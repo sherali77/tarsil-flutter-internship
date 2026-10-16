@@ -9,8 +9,8 @@ void main() {
   s.Withdrawl(100000);
   print(s.getBalance);
   //part3
-  Circle c = Circle();
-  Rectangle r = Rectangle();
-  print(c.Calculate_Area());
-  print(r.Calculate_Area());
+  List<Shape> shapes = [Circle(), Rectangle()];
+  for (var shape in shapes) {
+    print('${shape.Calculate_Area()}');
+  }
 }
