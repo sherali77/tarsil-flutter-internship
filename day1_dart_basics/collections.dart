@@ -10,11 +10,8 @@ void main() {
   for (var i = 0; i < shoppings.length; i++) {
     print("${shoppings[i]} $i");
   }
-  for (var i = 0; i < shoppings.length; i++) {
-    if (shoppings[i] == 'milk') {
-      print('exists');
-    }
-  }
+  bool hasMilk = shoppings.contains("milk");
+  print(hasMilk);
   //part 2
   Map<String, double> marks = {
     'sher': 50,
@@ -26,11 +23,16 @@ void main() {
   double avg = 0;
   double sum = 0;
   for (var item in marks.entries) {
+    print('${item.key} ${item.value}');
     sum += item.value;
-    avg = sum / 5;
+    avg = sum / marks.length;
   }
-  print(marks);
+  // print(marks);
   print(avg);
+  var topStudent = marks.entries.reduce((a, b) => a.value > b.value ? a : b);
+  print(
+    '${topStudent.key} is the top student with the marks: ${topStudent.value} !',
+  );
   //part 3
   Set<String> colors = {'red', 'green', 'blue'};
   colors.add('red');
