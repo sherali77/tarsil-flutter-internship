@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:g_view/widgets/product_widget.dart';
 
 void main() {
   runApp(const ProductApp());
@@ -196,8 +197,8 @@ class ProductListScreen extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                                )
-                              ]
+                                ),
+                              ],
                             ),
                           ),
                           Padding(
@@ -371,6 +372,24 @@ class ProductListScreen extends StatelessWidget {
                         ],
                       ),
                     ),
+                    ProductCard(
+                      imgUrl: 'assets/sugar.jpg',
+                      name: 'Sugar',
+                      price: 'Rs. 150',
+                      isSale: true,
+                    ),
+                    ProductCard(
+                      imgUrl: 'assets/flour.jfif',
+                      name: 'Flour',
+                      price: 'Rs. 350',
+                      isSale: false,
+                    ),
+                    // ProductCard(
+                    //   imgUrl: 'assets/sugar.jpg',
+                    //   name: 'Sugar',
+                    //   price: 'Rs. 850',
+                    //   isSale: true,
+                    // ),
                   ],
                 ),
               ],
