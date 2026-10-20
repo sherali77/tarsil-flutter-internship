@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ProductCard extends StatelessWidget {
+class ProductCard extends StatefulWidget {
   final String name;
   final String price;
   final String imgUrl;
@@ -12,6 +12,12 @@ class ProductCard extends StatelessWidget {
     required this.imgUrl,
     required this.isSale,
   });
+  @override
+  State<ProductCard> createState() => _ProductCardStste();
+}
+
+class _ProductCardStste extends State<ProductCard> {
+  bool isLiked = false;
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -27,9 +33,9 @@ class ProductCard extends StatelessWidget {
                 Container(
                   color: Colors.teal.shade100,
                   width: double.infinity,
-                  child: Image.asset(imgUrl, fit: BoxFit.cover),
+                  child: Image.asset(widget.imgUrl, fit: BoxFit.cover),
                 ),
-                if (isSale)
+                if (widget.isSale)
                   Positioned(
                     top: 10,
                     right: 10,
@@ -51,6 +57,26 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.white,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      icon: Icon(
+                      isLiked ? Icons.favorite : Icons.favorite_border,
+                        color: isLiked ? Colors.red : Colors.grey,
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          isLiked = !isLiked;
+                        });
+                      },
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -60,7 +86,7 @@ class ProductCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  widget.name,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -68,7 +94,7 @@ class ProductCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  price,
+                  widget.price,
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
               ],

@@ -32,8 +32,8 @@ class ProductListScreen extends StatelessWidget {
                 GridView.count(
                   crossAxisCount: 2,
                   shrinkWrap: true,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
                     Card(
