@@ -16,8 +16,8 @@ void main() {
   List<int> numbers = [3, 8, 12, 5, 7, 20];
   var evens = numbers.where((n) => n % 2 == 0).toList();
   print('$evens is the list of evens');
-  var squares = numbers.map((n) => n * n).toList();
+  var squares = evens.map((n) => n * n).toList();
   print('$squares is the list of squares of numbers');
-  var sum = numbers.reduce((value, element) => value + element);
+  var sum = squares.reduce((value, element) => value + element);
   print('$sum is the sum of list numbers');
 }

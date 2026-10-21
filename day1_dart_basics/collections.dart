@@ -25,8 +25,8 @@ void main() {
   for (var item in marks.entries) {
     print('${item.key} ${item.value}');
     sum += item.value;
-    avg = sum / marks.length;
   }
+    avg = sum / marks.length;
   // print(marks);
   print(avg);
   var topStudent = marks.entries.reduce((a, b) => a.value > b.value ? a : b);

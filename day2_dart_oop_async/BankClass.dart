@@ -1,39 +1,28 @@
 class BankAccount {
   double _balance = 0.0;
-  double get getBalance {
-    return _balance;
-  }
-
-  set Deposit(double amount) {
-    if (amount > 0) {
-      _balance += amount;
+  double get Getbalance => _balance;
+  void deposit(double amount){
+    if (amount>0){
+      _balance = _balance + amount;
     } else {
       print('Invalid Amount!');
     }
   }
-
-  double Withdrawl(double amount) {
-    if (_balance >= amount && amount > 0) {
-      _balance -= amount;
+  void withdrawl(double amount){
+    if (amount<=0){
+      print('Invalid Amount!');
+    } else if (_balance>=amount){
+      _balance = _balance - amount;
     } else {
-      print('insufficient amount');
+      print('Insufficient amount');
     }
-    return _balance;
   }
 }
-
-class SavingsAccount extends BankAccount {
-  double result = 0.0;
-  void addIntrest() {
-    double intrest_rate = _balance * 0.5;
-    result = _balance + intrest_rate;
-    _balance = result;
-  }
-
-  @override
-  set Deposit(double amount) {
-    if (amount > 0) {
-      super.Deposit = amount;
-    }
+class SavingsAccount extends BankAccount{
+  double intrestRate;
+  SavingsAccount(this.intrestRate);
+  void addIntrest(){
+    double result = (_balance * intrestRate)/100;
+    deposit(result);
   }
 }

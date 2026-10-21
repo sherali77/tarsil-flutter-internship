@@ -1,7 +1,7 @@
 // part 1
 Future<String> fetchUserName() async {
   print('Loading...');
-  await Future.delayed(Duration(seconds: 2));
+  await Future.delayed(Duration(seconds: 1));
   return "Username fetched successfully";
 }
 
@@ -9,17 +9,17 @@ Future<String> fetchUserName() async {
 Future<void> fetchWeatherData() async {
   try {
     print('Fetching weather data...');
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(Duration(seconds: 1));
     throw "Internet connection failed!";
   } catch (error) {
     print("Error: $error");
   }
 }
 //part 3
-Stream<int> Countdown() async* {
-  for (int i = 0; i < 3; i++) {
+Stream<int> Countdown(int i) async* {
+  for ( int j = i; j >= 0; j--) {
     await Future.delayed(Duration(seconds: 1));
-    yield i;
+    yield j;
   }
 }
 
@@ -28,7 +28,7 @@ void main() async {
   String data = await fetchUserName();
   print(data);
   await fetchWeatherData();
-  await for (int value in Countdown()) {
+  await for (int value in Countdown(5)) {
     print('New value from STream $value');
   }
   print("main function is completed");

@@ -22,6 +22,5 @@ void main() {
   print("The constant is $pi and the final is $area");
   //part 3
   String? nickname = "sheru";
-  print(nickname ?? "the value is null");
   print(nickname?.length ?? 0);
 }

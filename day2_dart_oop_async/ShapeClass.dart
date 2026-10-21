@@ -1,11 +1,12 @@
-import 'dart:io';
+// import 'dart:io';
 
 abstract class Shape {
   double Calculate_Area();
 }
 
 class Circle extends Shape {
-  double radius = 2;
+  double radius;
+  Circle(this.radius);
   double pi = 3.14;
   @override
   double Calculate_Area() {
@@ -13,12 +14,14 @@ class Circle extends Shape {
     return area;
   }
 }
+
 class Rectangle extends Shape {
-  double len = 2;
-  double wid = 3;
+  double len;
+  double wid;
+  Rectangle(this.len, this.wid);
   @override
   double Calculate_Area() {
-    double area = len*wid;
+    double area = len * wid;
     return area;
   }
 }
