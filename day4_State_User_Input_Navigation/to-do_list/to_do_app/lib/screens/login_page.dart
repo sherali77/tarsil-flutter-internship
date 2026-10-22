@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 // import 'package:to_do_app/screens/todo_screen.dart';
 import 'dashboard.dart';
 
@@ -17,9 +18,21 @@ class _signupScreenState extends State<SignupScreen> {
   final emailRegex = RegExp(r'^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}$');
   bool isPassword = true;
   @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.from(alpha: 1, red: 0.757, green: 0.863, blue: 0.91),
+      backgroundColor: const Color.from(
+        alpha: 1,
+        red: 0.757,
+        green: 0.863,
+        blue: 0.91,
+      ),
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 104, 137, 154),
         title: Text(
@@ -32,8 +45,7 @@ class _signupScreenState extends State<SignupScreen> {
         ),
         centerTitle: true,
       ),
-      body:
-       Padding(
+      body: Padding(
         padding: EdgeInsetsGeometry.all(16),
         child: Form(
           key: _formkey,
@@ -68,45 +80,47 @@ class _signupScreenState extends State<SignupScreen> {
                 },
               ),
               SizedBox(height: 20),
-               TextFormField(
-                  controller: passwordController,
-                  obscureText: isPassword,
-                  decoration: InputDecoration(
-                    labelText: "Password",
-                    hintText: "password",
-                    border: const OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        isPassword ? Icons.visibility_off : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          isPassword = !isPassword;
-                        });
-                      },
+              TextFormField(
+                controller: passwordController,
+                obscureText: isPassword,
+                decoration: InputDecoration(
+                  labelText: "Password",
+                  hintText: "password",
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      isPassword ? Icons.visibility_off : Icons.visibility,
                     ),
+                    onPressed: () {
+                      setState(() {
+                        isPassword = !isPassword;
+                      });
+                    },
                   ),
-                  validator: (value) {
-                    if (value == null) {
-                      return "Password should not be empty";
-                    }
-                    if (passwordController.text.length < 6) {
-                      return "Password must be 6 characters";
-                    }
-                    return null;
-                  },
                 ),
-                SizedBox(height: 20),
+                validator: (value) {
+                  if (value == null) {
+                    return "Password should not be empty";
+                  }
+                  if (passwordController.text.length < 6) {
+                    return "Password must be 6 characters";
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   if (_formkey.currentState!.validate()) {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => MainDashboardScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => MainDashboardScreen(),
+                      ),
                     );
                   }
                 },
-                child: const Text("Login & to-do"),
+                child: const Text("Login"),
               ),
             ],
           ),
