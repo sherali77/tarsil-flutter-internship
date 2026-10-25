@@ -16,6 +16,7 @@ class _signupScreenState extends State<SignupScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final emailRegex = RegExp(r'^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}$');
+  String showEmail = "";
   bool isPassword = true;
   @override
   void dispose() {
@@ -26,6 +27,7 @@ class _signupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    showEmail = emailController.text;
     return Scaffold(
       backgroundColor: const Color.from(
         alpha: 1,
@@ -115,7 +117,7 @@ class _signupScreenState extends State<SignupScreen> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => MainDashboardScreen(),
+                        builder: (context) => MainDashboardScreen(showEmail: emailController.text,),
                       ),
                     );
                   }

@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'todo_screen.dart';
 import 'profile_screen.dart';
 import 'completed.dart';
+import 'login_page.dart';
 
 class MainDashboardScreen extends StatefulWidget {
-  const MainDashboardScreen({super.key});
+  final dynamic showEmail;
+
+  const MainDashboardScreen({super.key, required this.showEmail});
   @override
   State<MainDashboardScreen> createState() => _MainDashboardScreenState();
 }
@@ -26,14 +29,19 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         onTaskChanged: () {
           setState(() {}); 
         },
+        onListUpdated: (newList) {
+            setState(() {
+            todoList = newList; 
+    });
+      },
       ),
       showCompleted(completedTask: completedTasks), 
     ];
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Welcome to Dashboard",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          "Welcome!  ${widget.showEmail}",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),

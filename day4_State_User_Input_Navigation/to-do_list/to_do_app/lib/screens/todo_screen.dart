@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:to_do_app/screens/display.dart';
+
 import 'dart:math';
 
 class ToDo {
@@ -14,16 +15,19 @@ class ToDo {
     this.isDone = false,
     required this.compAt,
   });
+
+  // bool operator [](int other) {}
 }
 
 class TodoApp extends StatefulWidget {
-  final List<ToDo> todoList;
-  final VoidCallback onTaskChanged;
-
-  const TodoApp({
+  List<ToDo> todoList;
+  VoidCallback onTaskChanged;
+  final Function(List<ToDo>) onListUpdated;
+    TodoApp({
     super.key,
     required this.todoList,
     required this.onTaskChanged,
+    required this.onListUpdated,
   });
   @override
   State<TodoApp> createState() => _todoAppState();
@@ -33,18 +37,22 @@ class _todoAppState extends State<TodoApp> {
   // List<String> completedlist = [];
   final TextEditingController taskController = TextEditingController();
   String name = "";
-  int counter = 0;
+  // List counter =
   // String flag = "";
   @override
   void dispose() {
     taskController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
-    int next = widget.todoList.isEmpty 
-    ? 1 
-    : widget.todoList.map((task) => task.id).reduce((a, b) => a > b ? a : b) + 1;
+    int next = widget.todoList.isEmpty
+        ? 1
+        : widget.todoList
+                  .map((task) => task.id)
+                  .reduce((a, b) => a > b ? a : b) +
+              1;
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -154,116 +162,14 @@ class _todoAppState extends State<TodoApp> {
                           onChanged: (value) {
                             setState(() {
                               widget.todoList[index].isDone = value!;
-                              if (widget.todoList[index].isDone) {
-                                counter++;
-                                // completedlist.add(todoItem.title);
-                              } else {
-                                counter--;
-                              }
                             });
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.edit,
-                            color: Colors.blue,
-                            size: 20,
-                          ),
-                          onPressed: () {
-                            TextEditingController editController =
-                                TextEditingController(text: todoItem.title);
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  title: const Text("Edit Task"),
-                                  content: TextField(
-                                    controller: editController,
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                      labelText: "Update task",
-                                    ),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text("Cancel"),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          todoItem.title = editController.text;
-                                        });
-                                        Navigator.pop(context);
-                                      },
-                                      child: Text('Edit'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.delete,
-                            color: Colors.red,
-                            size: 20,
-                          ),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  title: const Text("Delete Task"),
-                                  content: Text(
-                                    "Are you sure to delete '${todoItem.title}' ?",
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text("Cancel"),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          widget.todoList.removeAt(index);
-                                        });
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text(
-                                        "Delete",
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.visibility,
-                            color: Colors.green,
-                            size: 20,
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return displayAll(task: todoItem);
-                                },
-                              ),
-                            );
                           },
                         ),
                       ],
                     ),
                     leading: Text(todoItem.id.toString()),
                     subtitle: Text(
-                      "Time: ${todoItem.compAt.hour}:${todoItem.compAt.minute}  |  Date: ${todoItem.compAt.day}/${todoItem.compAt.month}/${todoItem.compAt.year}",
+                      "Time: ${todoItem.compAt.hour}:${todoItem.compAt.minute} | Date: ${todoItem.compAt.day}/${todoItem.compAt.month}/${todoItem.compAt.year}",
                       style: TextStyle(fontSize: 8),
                     ),
                   ),
@@ -271,10 +177,37 @@ class _todoAppState extends State<TodoApp> {
               },
             ),
           ),
+          Padding(padding: EdgeInsetsGeometry.all(16),
+         child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+           IconButton(
+             icon: const Icon(
+               Icons.visibility,
+               color: Colors.green,
+               size: 40,
+             ),
+             onPressed: () async {
+               final updatedList = await Navigator.push(
+                 context,
+                 MaterialPageRoute(
+                   builder: (context) {
+                     return DisplayScreen(initialList: widget.todoList);
+                   },
+                 ),
+               );
+               if (updatedList != null) {
+                 widget.onListUpdated(updatedList);
+               }
+             },
+           ),
           Text(
-            "You had done $counter tasks",
+            "You had done ${widget.todoList.where((task) => task.isDone).length} tasks out of '${widget.todoList.length}'",
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
           ),
+            ],
+          ),
+          )
         ],
       ),
     );
