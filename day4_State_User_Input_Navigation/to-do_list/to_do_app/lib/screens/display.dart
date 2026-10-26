@@ -54,7 +54,7 @@ class _DisplayScreenState extends State<DisplayScreen> {
                     }
                     return ListTile(
                       title: Text(
-                        "${localItem.title}",
+                        localItem.title,
                         style: TextStyle(
                           decoration: localItem.isDone == true
                               ? TextDecoration.lineThrough
@@ -155,7 +155,7 @@ class _DisplayScreenState extends State<DisplayScreen> {
                               );
                             },
                           ),
-                          Text("$status"),
+                          Text(status),
                         ],
                       ),
                       subtitle: Text(

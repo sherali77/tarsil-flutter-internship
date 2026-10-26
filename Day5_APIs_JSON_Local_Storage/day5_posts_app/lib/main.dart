@@ -1,8 +1,12 @@
 import 'package:day5_posts_app/screens/home.dart';
 import 'package:flutter/material.dart';
 
+void main() {
+  runApp(MyPosts());
+}
+
 class MyPosts extends StatelessWidget {
-  MyPosts({super.key});
+  const MyPosts({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +17,7 @@ class MyPosts extends StatelessWidget {
         colorSchemeSeed: Colors.lightBlueAccent,
         useMaterial3: true,
       ),
-      home: ShowPosts(),
+      home: HomeScreen(),
     );
   }
 }

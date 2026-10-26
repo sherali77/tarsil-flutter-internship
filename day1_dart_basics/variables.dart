@@ -22,5 +22,5 @@ void main() {
   print("The constant is $pi and the final is $area");
   //part 3
   String? nickname = "sheru";
-  print(nickname?.length ?? 0);
+  print(nickname.length ?? 0);
 }

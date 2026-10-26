@@ -22,7 +22,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         .where((task) => task.isDone == true)
         .map((task) => task.title)
         .toList();
-       final List<Widget> _screens = [
+       final List<Widget> screens = [
       const ProfileApp(),
       TodoApp(
         todoList: todoList, 
@@ -45,7 +45,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         ),
         centerTitle: true,
       ),
-      body: _screens[_currentIndex],
+      body: screens[_currentIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {

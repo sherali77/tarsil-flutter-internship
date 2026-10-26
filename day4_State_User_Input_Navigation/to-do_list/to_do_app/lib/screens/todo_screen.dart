@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:to_do_app/screens/display.dart';
 
-import 'dart:math';
 
 class ToDo {
   final int id;
