@@ -5,7 +5,7 @@ import 'package:day5_posts_app/screens/modalclass.dart';
 
 class DisplayPost extends StatefulWidget {
   final Post post;
-  DisplayPost({super.key, required this.post});
+  const DisplayPost({super.key, required this.post});
 
   @override
   State<DisplayPost> createState() => _DisplayPostState();
@@ -87,11 +87,11 @@ class _DisplayPostState extends State<DisplayPost> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "${widget.post.title}",
+                    widget.post.title,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 20),
-                  Text("${widget.post.body}", style: TextStyle(fontSize: 15)),
+                  Text(widget.post.body, style: TextStyle(fontSize: 15)),
                   SizedBox(height: 20),
                   Text(
                     "Comments :",
@@ -110,12 +110,12 @@ class _DisplayPostState extends State<DisplayPost> {
                           ),
                           child: ListTile(
                             title: Text(
-                              "${comment.name}",
+                              comment.name,
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            subtitle: Text("${comment.body}",
+                            subtitle: Text(comment.body,
                             maxLines: 2,),
-                            trailing: Text("${comment.email}"),
+                            trailing: Text(comment.email),
                             // leading: Text("Post ID: ${comment.postId}"),
                           ),
                         );

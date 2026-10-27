@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:to_do_app/screens/display.dart';
 
-
 class ToDo {
   final int id;
   String title;
@@ -14,8 +13,22 @@ class ToDo {
     this.isDone = false,
     required this.compAt,
   });
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'isDone': isDone,     
+        'compAt': compAt.toIso8601String(), 
+      };
+  factory ToDo.fromJson(Map<String, dynamic> json) {
+    return ToDo(
+      id: json['id'] as int,
+      title: json['title'] as String,
+      isDone: json['isDone'] as bool ?? false, 
+      compAt: DateTime.parse(json['compAt'] as String),
+    );
+  }
 
-  // bool operator [](int other) {}
+  // Object? toJson() {}
 }
 
 class TodoApp extends StatefulWidget {

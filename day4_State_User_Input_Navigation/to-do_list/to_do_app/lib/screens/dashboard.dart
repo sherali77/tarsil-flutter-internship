@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'dart:convert';
 
 import 'todo_screen.dart';
 import 'profile_screen.dart';
@@ -17,25 +20,52 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
   List<ToDo> todoList = [];
   int _currentIndex = 0;
   @override
+  void initState() {
+    super.initState();
+    _loadList();
+  }
+
+  Future<void> _loadList() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? tasksString = prefs.getString('saved_tasks');
+    if (tasksString != null) {
+      final List<dynamic> decodedList = jsonDecode(tasksString);
+      setState(() {
+        todoList = decodedList.map((item) => ToDo.fromJson(item)).toList();
+      });
+    }
+  }
+
+  Future<void> _savedList() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String encodedList = jsonEncode(
+      todoList.map((task) => task.toJson()).toList(),
+    );
+    await prefs.setString('saved_tasks', encodedList);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final completedTasks = todoList
         .where((task) => task.isDone == true)
         .map((task) => task.title)
         .toList();
-       final List<Widget> screens = [
+    final List<Widget> screens = [
       const ProfileApp(),
       TodoApp(
-        todoList: todoList, 
+        todoList: todoList,
         onTaskChanged: () {
-          setState(() {}); 
+          setState(() {});
+          _savedList();
         },
         onListUpdated: (newList) {
-            setState(() {
-            todoList = newList; 
-    });
-      },
+          setState(() {
+            todoList = newList;
+          });
+          _savedList();
+        },
       ),
-      showCompleted(completedTask: completedTasks), 
+      showCompleted(completedTask: completedTasks),
     ];
     return Scaffold(
       appBar: AppBar(

@@ -13,16 +13,36 @@ class HomeScreen extends StatefulWidget {
 class _PostsScreenState extends State<HomeScreen> {
   final ApiService _apiService = ApiService();
   late Future<List<Post>> _postsFuture;
+  List<Post> allPosts = [];
+  List<Post> filteredPosts = [];
 
   @override
   void initState() {
     super.initState();
     _loadPosts();
   }
-
-  void _loadPosts() {
+  Future<void> _loadPosts() async {
+    final posts = await _apiService.fetchPosts();
     setState(() {
-      _postsFuture = _apiService.fetchPosts();
+      allPosts = posts;     
+      filteredPosts = posts;    
+      _postsFuture = Future.value(posts);
+    });
+  }
+
+  void searchPost(String keyword) {
+    List<Post> searchList = [];
+    if (keyword.isEmpty) {
+      searchList = allPosts;
+    } else {
+      searchList = allPosts
+          .where(
+            (post) => post.title.toLowerCase().contains(keyword.toLowerCase()),
+          )
+          .toList();
+    }
+    setState(() {
+      filteredPosts = searchList;
     });
   }
 
@@ -30,11 +50,9 @@ class _PostsScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('JsonPlaceholder.typico Posts',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-        ),
+        title: const Text(
+          'JsonPlaceholder Posts',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         centerTitle: true,
       ),
@@ -64,7 +82,7 @@ class _PostsScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton.icon(
-                      onPressed: _loadPosts,
+                      onPressed: () => _loadPosts(),
                       icon: const Icon(Icons.refresh),
                       label: const Text('Retry'),
                     ),
@@ -74,37 +92,58 @@ class _PostsScreenState extends State<HomeScreen> {
             );
           }
           if (snapshot.hasData) {
-            final posts = snapshot.data!;
-            if (posts.isEmpty) {
+            if (filteredPosts.isEmpty) {
               return const Center(child: Text('No posts found.'));
             }
-            return ListView.builder(
-              itemCount: posts.length,
-              itemBuilder: (context, index) {
-                final post = posts[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  child: ListTile(
-                    leading: CircleAvatar(child: Text('${post.id}')),
-                    title: Text(
-                      post.title,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  TextField(
+                    onChanged: (value) => searchPost(value),
+                    decoration: InputDecoration(
+                      labelText: 'Search by Title',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DisplayPost(post:post),
-                          
-                          ),
-                      );
-                    },
                   ),
-                );
-              },
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: RefreshIndicator(
+                      onRefresh: () => _loadPosts(),
+                      child: ListView.builder(
+                        itemCount: filteredPosts.length,
+                        itemBuilder: (context, index) {
+                          final post = filteredPosts[index];
+                          return Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 5,
+                              vertical: 5,
+                            ),
+                            child: ListTile(
+                              leading: CircleAvatar(child: Text('${post.id}')),
+                              title: Text(
+                                post.title,
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => DisplayPost(post: post),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             );
           }
           return const Center(child: Text('Something went wrong!'));

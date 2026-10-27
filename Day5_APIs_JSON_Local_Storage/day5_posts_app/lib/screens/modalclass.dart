@@ -1,8 +1,8 @@
 class Post {
-  int id = 0;
-  int userId = 0;
-  String title = "";
-  String body = "";
+  int id;
+  int userId;
+  String title;
+  String body;
 
   Post({
     required this.id,
