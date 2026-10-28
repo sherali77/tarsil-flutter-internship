@@ -19,31 +19,36 @@ class _PostsScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadPosts();
+    _postsFuture = _apiService.fetchPosts().then((posts) {
+      setState(() {
+        allPosts = posts;
+        filteredPosts = posts;
+      });
+      return posts;
+    });
   }
-  Future<void> _loadPosts() async {
+
+  Future<void> _loadPosts() async  {
     final posts = await _apiService.fetchPosts();
     setState(() {
-      allPosts = posts;     
-      filteredPosts = posts;    
+      allPosts = posts;
+      filteredPosts = posts;
       _postsFuture = Future.value(posts);
     });
   }
 
   void searchPost(String keyword) {
-    List<Post> searchList = [];
+    // List<Post> searchList = [];
     if (keyword.isEmpty) {
-      searchList = allPosts;
+      filteredPosts = allPosts;
     } else {
-      searchList = allPosts
+      filteredPosts = allPosts
           .where(
             (post) => post.title.toLowerCase().contains(keyword.toLowerCase()),
           )
           .toList();
     }
-    setState(() {
-      filteredPosts = searchList;
-    });
+    setState(() {});
   }
 
   @override
@@ -92,7 +97,7 @@ class _PostsScreenState extends State<HomeScreen> {
             );
           }
           if (snapshot.hasData) {
-            if (filteredPosts.isEmpty) {
+            if (allPosts.isEmpty) {
               return const Center(child: Text('No posts found.'));
             }
             return Padding(
@@ -126,13 +131,16 @@ class _PostsScreenState extends State<HomeScreen> {
                               leading: CircleAvatar(child: Text('${post.id}')),
                               title: Text(
                                 post.title,
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               onTap: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => DisplayPost(post: post),
+                                    builder: (context) =>
+                                        DisplayPost(post: post),
                                   ),
                                 );
                               },

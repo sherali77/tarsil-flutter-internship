@@ -14,16 +14,16 @@ class ToDo {
     required this.compAt,
   });
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'isDone': isDone,     
-        'compAt': compAt.toIso8601String(), 
-      };
+    'id': id,
+    'title': title,
+    'isDone': isDone,
+    'compAt': compAt.toIso8601String(),
+  };
   factory ToDo.fromJson(Map<String, dynamic> json) {
     return ToDo(
       id: json['id'] as int,
       title: json['title'] as String,
-      isDone: json['isDone'] as bool ?? false, 
+      isDone: json['isDone'] as bool ?? false,
       compAt: DateTime.parse(json['compAt'] as String),
     );
   }
@@ -35,7 +35,7 @@ class TodoApp extends StatefulWidget {
   List<ToDo> todoList;
   VoidCallback onTaskChanged;
   final Function(List<ToDo>) onListUpdated;
-    TodoApp({
+  TodoApp({
     super.key,
     required this.todoList,
     required this.onTaskChanged,
@@ -114,6 +114,7 @@ class _todoAppState extends State<TodoApp> {
                         );
                         taskController.clear();
                       });
+                      widget.onTaskChanged();
                     }
                   },
                   child: const Text("add"),
@@ -175,6 +176,7 @@ class _todoAppState extends State<TodoApp> {
                             setState(() {
                               widget.todoList[index].isDone = value!;
                             });
+                            widget.onTaskChanged();
                           },
                         ),
                       ],
@@ -189,37 +191,38 @@ class _todoAppState extends State<TodoApp> {
               },
             ),
           ),
-          Padding(padding: EdgeInsetsGeometry.all(16),
-         child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-           IconButton(
-             icon: const Icon(
-               Icons.visibility,
-               color: Colors.green,
-               size: 40,
-             ),
-             onPressed: () async {
-               final updatedList = await Navigator.push(
-                 context,
-                 MaterialPageRoute(
-                   builder: (context) {
-                     return DisplayScreen(initialList: widget.todoList);
-                   },
-                 ),
-               );
-               if (updatedList != null) {
-                 widget.onListUpdated(updatedList);
-               }
-             },
-           ),
-          Text(
-            "You had done ${widget.todoList.where((task) => task.isDone).length} tasks out of '${widget.todoList.length}'",
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          Padding(
+            padding: EdgeInsetsGeometry.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.visibility,
+                    color: Colors.green,
+                    size: 40,
+                  ),
+                  onPressed: () async {
+                    final updatedList = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return DisplayScreen(initialList: widget.todoList);
+                        },
+                      ),
+                    );
+                    if (updatedList != null) {
+                      widget.onListUpdated(updatedList);
+                    }
+                  },
+                ),
+                Text(
+                  "You had done ${widget.todoList.where((task) => task.isDone).length} tasks out of '${widget.todoList.length}'",
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
           ),
-            ],
-          ),
-          )
         ],
       ),
     );

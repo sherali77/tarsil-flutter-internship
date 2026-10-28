@@ -15,16 +15,17 @@ class ApiService {
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
         return jsonData.map((item) => Post.fromJson(item)).toList();
-      }else if (response.statusCode == 400) {
-        throw Exception('Bad Request. Please check your input. ${response.statusCode}');
-      }else if (response.statusCode == 404) {
+      } else if (response.statusCode == 400) {
+        throw Exception(
+          'Bad Request. Please check your input. ${response.statusCode}',
+        );
+      } else if (response.statusCode == 404) {
         throw Exception('Page not found!. ${response.statusCode}');
+      } else {
+        throw Exception('Error: ${response.statusCode}');
       }
-        else {
-        throw Exception('Error by the server : ${response.statusCode}');
-      } 
     } catch (e) {
-      throw Exception('Connection failed check your internet!');
+      throw Exception(e.toString());
     }
   }
 
@@ -39,15 +40,16 @@ class ApiService {
         final List<dynamic> JsonData = jsonDecode(response.body);
         return JsonData.map((item) => Comment.fromJson(item)).toList();
       } else if (response.statusCode == 400) {
-        throw Exception('Bad Request. Please check your input. ${response.statusCode}');
-      }else if (response.statusCode == 404) {
+        throw Exception(
+          'Bad Request. Please check your input. ${response.statusCode}',
+        );
+      } else if (response.statusCode == 404) {
         throw Exception('Page not found!. ${response.statusCode}');
-      }
-        else {
-        throw Exception('Error by the server : ${response.statusCode}');
+      } else {
+        throw Exception('Error : ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('An unexpected error occured $e');
+      throw Exception(e.toString());
     }
   }
 }

@@ -18,6 +18,8 @@ class MainDashboardScreen extends StatefulWidget {
 
 class _MainDashboardScreenState extends State<MainDashboardScreen> {
   List<ToDo> todoList = [];
+  bool isDark = true;
+  // bool flag = true;
   int _currentIndex = 0;
   @override
   void initState() {
@@ -51,7 +53,13 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         .map((task) => task.title)
         .toList();
     final List<Widget> screens = [
-      const ProfileApp(),
+      ProfileScreen(
+        onThemeChanged: (bool flag) {
+          setState(() {
+            isDark = flag;
+          });
+        },
+      ),
       TodoApp(
         todoList: todoList,
         onTaskChanged: () {
@@ -74,6 +82,19 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.logout,color: Colors.red,size: 20,),
+          onPressed: () async {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool("is logged in", false);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SignupScreen(isLogedin: (flag) {}),
+              ),
+            );
+          },
+        ),
       ),
       body: screens[_currentIndex],
       bottomNavigationBar: NavigationBar(
@@ -82,6 +103,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           setState(() {
             _currentIndex = index;
           });
+          _savedList();
         },
         destinations: const [
           NavigationDestination(

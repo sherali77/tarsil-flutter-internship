@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // import 'package:to_do_app/screens/todo_screen.dart';
 import 'dashboard.dart';
@@ -6,7 +7,8 @@ import 'dashboard.dart';
 // import 'screens/todo_screen.dart';
 
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+  final Function(bool) isLogedin;
+  const SignupScreen({super.key, required this.isLogedin});
   @override
   State<StatefulWidget> createState() => _signupScreenState();
 }
@@ -18,6 +20,26 @@ class _signupScreenState extends State<SignupScreen> {
   final emailRegex = RegExp(r'^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}$');
   String showEmail = "";
   bool isPassword = true;
+  bool session = false;
+  @override
+  void initState() {
+    super.initState();
+    _IsLoggedIn();
+  }
+
+  Future<void> _IsLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      session = prefs.getBool('is logged in') ?? false;
+    });
+  }
+
+  Future<void> setSession(bool token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('is logged in', token);
+    widget.isLogedin(token);
+  }
+
   @override
   void dispose() {
     emailController.dispose();
@@ -117,9 +139,15 @@ class _signupScreenState extends State<SignupScreen> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => MainDashboardScreen(showEmail: emailController.text,),
+                        builder: (context) => MainDashboardScreen(
+                          showEmail: emailController.text,
+                        ),
                       ),
                     );
+                    setState(() {
+                    session = true;
+                  });
+                  setSession(session);
                   }
                 },
                 child: const Text("Login"),

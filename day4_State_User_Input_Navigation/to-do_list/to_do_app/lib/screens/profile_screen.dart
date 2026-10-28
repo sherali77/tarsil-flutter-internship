@@ -1,41 +1,62 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ProfileApp extends StatelessWidget {
-  const ProfileApp({super.key});
+// class ProfileApp extends StatelessWidget {
+//   const ProfileApp({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: "Profile App",
-      home: ProfileScreen(),
-    );
-  }
-}
+// @override
+// Widget build(BuildContext context) {
+//   return MaterialApp(
+//     debugShowCheckedModeBanner: false,
+//     title: "Profile App",
+//     home: ProfileScreen(),
+//   );
+// }
+// }
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
-
+  final Function(bool) onThemeChanged;
+  const  ProfileScreen({super.key, required this.onThemeChanged});
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  bool isDark = false;
+  bool isDark = true;
+  @override
+  void initState() {
+    super.initState();
+    _loadThemePreference();
+  }
+  Future<void> _loadThemePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isDark = prefs.getBool('is dark mode') ?? true;
+    });
+  }
+  Future<void> setSwitch(bool flag) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('is dark mode', flag);
+    widget.onThemeChanged(flag);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Theme(
       data: isDark ? ThemeData.light() : ThemeData.dark(),
       child: Scaffold(
-        backgroundColor: isDark? const Color.fromARGB(255, 55, 54, 54) : Colors.white10,
+        backgroundColor: isDark
+            ? const Color.fromARGB(255, 55, 54, 54)
+            : Colors.white10,
         appBar: AppBar(
           actions: [
             Switch(
               value: isDark,
               onChanged: (value) {
                 setState(() {
-                  isDark = value; 
+                  isDark = value;
                 });
+                setSwitch(value);
               },
             ),
           ],
@@ -47,21 +68,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                   CircleAvatar(
+                  CircleAvatar(
                     radius: 50.0,
                     backgroundImage: AssetImage("assets/new.jpg"),
                     backgroundColor: isDark ? Colors.white : Colors.black,
-                    // child: Text(
-                    //   "SAB",
-                    //   style: TextStyle(
-                    //     fontSize: 24,
-                    //     fontWeight: FontWeight.bold,
-                    //     color: Colors.teal,
-                    //   ),
-                    // ),
                   ),
                   const SizedBox(height: 16),
-                   Text(
+                  Text(
                     "Sher Ali Bajwa",
                     style: TextStyle(
                       fontSize: 26,
@@ -70,7 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   const SizedBox(height: 6),
-                    Text(
+                  Text(
                     "flutter intern @ Tarsil Solutions",
                     style: TextStyle(
                       fontSize: 16,
@@ -119,7 +132,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
-            Icon(icon, color: isDark? Colors.teal.shade700 : Colors.amberAccent,),
+            Icon(
+              icon,
+              color: isDark ? Colors.teal.shade700 : Colors.amberAccent,
+            ),
             const SizedBox(width: 20),
             Text(
               text,
