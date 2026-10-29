@@ -173,6 +173,3 @@ class _DisplayScreenState extends State<DisplayScreen> {
   }
 }
 
-// extension on bool {
-//   get isDone => null;
-// }
