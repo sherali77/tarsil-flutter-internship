@@ -3,9 +3,13 @@ import 'package:notes_app/screens/api_service.dart';
 import 'package:notes_app/screens/create_note.dart';
 import 'package:notes_app/screens/model_class.dart';
 import 'package:notes_app/screens/note_details.dart';
+import 'package:notes_app/services/storage_services.dart';
+
+import 'dart:async';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
   @override
   State<HomePage> createState() => _HomeState();
 }
@@ -13,13 +17,15 @@ class HomePage extends StatefulWidget {
 class _HomeState extends State<HomePage> {
   List<Note> noteList = [];
   final ApiService _apiService = ApiService();
-  late Future<Map<String, dynamic>> _postsFuture;
+  late Future _notesFuture;
   String quotes = "";
 
   @override
   void initState() {
     super.initState();
-    _postsFuture = _apiService.fetchRandomQuote().then((quote) {
+    _loadSavedNotes();
+
+    _notesFuture = _apiService.fetchRandomQuote().then((quote) {
       setState(() {
         quotes = quote['quote'] ?? '';
       });
@@ -27,20 +33,27 @@ class _HomeState extends State<HomePage> {
     });
   }
 
+  Future<void> _loadSavedNotes() async {
+    final loadedNotes = await StorageService.loadNotes();
+    setState(() {
+      noteList = loadedNotes;
+    });
+  }
+
   Future<void> _loadQuotes() async {
     final quotesFetch = await _apiService.fetchRandomQuote();
     setState(() {
       quotes = quotesFetch['quote'] ?? '';
-      _postsFuture = Future.value(quotesFetch);
+      _notesFuture = Future.value(quotesFetch);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(39, 158, 158, 158),
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 223, 163, 0),
+        backgroundColor: Colors.amber[700],
         title: const Text(
           'Notes App',
           style: TextStyle(
@@ -54,8 +67,8 @@ class _HomeState extends State<HomePage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          FutureBuilder<Map<String, dynamic>>(
-            future: _postsFuture,
+          FutureBuilder(
+            future: _notesFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Padding(
@@ -66,6 +79,10 @@ class _HomeState extends State<HomePage> {
               if (snapshot.hasError) {
                 return Card(
                   margin: const EdgeInsets.all(12.0),
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Column(
@@ -93,8 +110,8 @@ class _HomeState extends State<HomePage> {
                 );
               }
               if (snapshot.hasData) {
-                final quoteData = snapshot.data!;
-                if (quoteData.isEmpty) {
+                final quoteData = snapshot.data as Map<String, dynamic>?;
+                if (quoteData == null || quoteData.isEmpty) {
                   return const SizedBox.shrink();
                 }
                 return Card(
@@ -108,7 +125,12 @@ class _HomeState extends State<HomePage> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(width: 10),
+                        const Icon(
+                          Icons.format_quote,
+                          size: 24,
+                          color: Colors.amber,
+                        ),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,7 +138,7 @@ class _HomeState extends State<HomePage> {
                               Text(
                                 '"${quoteData['quote']}"',
                                 style: const TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 13,
                                   fontStyle: FontStyle.italic,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -125,9 +147,9 @@ class _HomeState extends State<HomePage> {
                               Align(
                                 alignment: Alignment.centerRight,
                                 child: Text(
-                                  ' ${quoteData['author']}',
+                                  '— ${quoteData['author']}',
                                   style: const TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 11,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.grey,
                                   ),
@@ -137,7 +159,7 @@ class _HomeState extends State<HomePage> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.refresh, size: 20),
+                          icon: const Icon(Icons.refresh, size: 18),
                           onPressed: () => _loadQuotes(),
                           tooltip: 'New Quote',
                         ),
@@ -153,16 +175,24 @@ class _HomeState extends State<HomePage> {
             child: noteList.isEmpty
                 ? const Center(
                     child: Text(
-                      'No notes yet',
+                      'No notes yet — tap + to add one',
                       style: TextStyle(color: Colors.grey, fontSize: 16),
                     ),
                   )
-                : ListView.builder(
+                : RefreshIndicator(onRefresh: _loadSavedNotes,
+                   child: ListView.builder(
                     itemCount: noteList.length,
                     itemBuilder: (context, index) {
                       final note = noteList[index];
                       return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         child: ListTile(
                           title: Text(
                             note.title,
@@ -179,12 +209,13 @@ class _HomeState extends State<HomePage> {
                               style: const TextStyle(fontSize: 11),
                             ),
                           ),
-                           onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                    NoteDetails(displayList: noteList),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return NoteDetails();
+                                },
                               ),
                             );
                           },
@@ -192,36 +223,31 @@ class _HomeState extends State<HomePage> {
                       );
                     },
                   ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Align(
-              alignment: Alignment.bottomRight,
-              child: IconButton(
-                icon: const Icon(
-                  Icons.add_circle,
-                  color: Color.fromARGB(255, 223, 163, 0),
-                  size: 55,
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return CreateNote(
-                          noteList: noteList,
-                          ontaskChanged: () {
-                            setState(() {});
-                          },
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
           ),
         ],
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.amber[700],
+        child: const Icon(Icons.add, color: Colors.white, size: 30),
+        onPressed: () async {
+          final newNote = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                return const CreateNote();
+              },
+            ),
+          );
+
+          if (newNote != null && newNote is Note) {
+            setState(() {
+              noteList.add(newNote);
+            });
+            await StorageService.saveNotes(noteList);
+          }
+        },
       ),
     );
   }

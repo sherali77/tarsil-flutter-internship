@@ -2,145 +2,140 @@ import 'package:flutter/material.dart';
 import 'package:notes_app/screens/model_class.dart';
 
 class CreateNote extends StatefulWidget {
-  List<Note> noteList;
-  VoidCallback ontaskChanged;
-  CreateNote({super.key, required this.noteList, required this.ontaskChanged});
+  final Note? noteToEdit;
+  final int? noteIndex;
+
+  const CreateNote({super.key, this.noteToEdit, this.noteIndex});
+
   @override
   State<CreateNote> createState() => _CreateNoteState();
 }
 
 class _CreateNoteState extends State<CreateNote> {
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController bodyController = TextEditingController();
-  String selectedCategory = 'Work';
-  final List<String> categories = ['Work', 'Personal', 'Study'];
+  late TextEditingController _titleController;
+  late TextEditingController _contentController;
+  String _selectedCategory = 'Work';
+
+  final List<String> _categories = ['Work', 'Personal', 'Study'];
+
+  @override
+  void initState() {
+    super.initState();
+  
+    _titleController = TextEditingController(
+      text: widget.noteToEdit != null ? widget.noteToEdit!.title : '',
+    );
+    _contentController = TextEditingController(
+      text: widget.noteToEdit != null ? widget.noteToEdit!.content : '',
+    );
+    
+    if (widget.noteToEdit != null) {
+      _selectedCategory = widget.noteToEdit!.category;
+    }
+  }
 
   @override
   void dispose() {
-    titleController.dispose();
-    bodyController.dispose();
+    _titleController.dispose();
+    _contentController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    int next = widget.noteList.isEmpty
-        ? 1
-        : widget.noteList
-                  .map((task) => task.id)
-                  .reduce((a, b) => a > b ? a : b) +
-              1;
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 231, 234, 234),
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text(
-          "Create Note",
-          style: TextStyle(
-            fontSize: 22,
+        backgroundColor: Colors.amber[700],
+        title: Text(
+          'Create/Edit Note',
+          style: const TextStyle(
+            fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
         ),
         centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 73, 98, 109),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(17),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
           children: [
-            // Title TextField
             TextField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                labelText: "Title",
-                hintText: "Enter note title...",
-                border: OutlineInputBorder(),
+              controller: _titleController,
+              decoration: InputDecoration(
+                labelText: 'Title',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: const Color.fromARGB(255, 0, 0, 0),
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _contentController,
+              maxLines: 5,
+              decoration: InputDecoration(
+                labelText: 'Content',
+                alignLabelWithHint: true,
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
-            const SizedBox(height: 15),
-
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: selectedCategory,
-              decoration: const InputDecoration(
-                labelText: "Category",
-                border: OutlineInputBorder(),
+              value: _selectedCategory,
+              decoration: InputDecoration(
+                labelText: 'Category',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              items: categories.map((String category) {
+              items: _categories.map((String category) {
                 return DropdownMenuItem<String>(
                   value: category,
                   child: Text(category),
                 );
               }).toList(),
               onChanged: (String? newValue) {
-                if (newValue != null) {
-                  setState(() {
-                    selectedCategory = newValue;
-                  });
-                }
+                setState(() {
+                  _selectedCategory = newValue!;
+                });
               },
             ),
-            const SizedBox(height: 15),
-            TextField(
-              controller: bodyController,
-              decoration: const InputDecoration(
-                labelText: "Content",
-                hintText: "Write your note here...",
-                border: OutlineInputBorder(),
-              ),
-              style: TextStyle(
-                fontSize: 16,
-                color: const Color.fromARGB(255, 0, 0, 0),
-              ),
-              maxLines: 5,
-            ),
-            const SizedBox(height: 15),
-
+            const SizedBox(height: 24),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber[700],
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
               onPressed: () {
-                final titleText = titleController.text.trim();
-                if (titleText.isEmpty || titleText.length < 3) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        "Title is required and must be at least 3 characters!",
-                      ),
-                      duration: Duration(seconds: 3),
-                      backgroundColor: Colors.black87,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                } else {
-                  setState(() {
-                    widget.noteList.add(
-                      Note(
-                        id: next,
-                        title: titleController.text,
-                        content: bodyController.text,
-                        category: selectedCategory,
-                        createdAt: DateTime.now(),
-                        updatedAt: DateTime.now(),
-                      ),
-                    );
-                  });
-                  widget.ontaskChanged();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Note created successfully!"),
-                      duration: Duration(seconds: 2),
-                      backgroundColor: Colors.green,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
+                final title = _titleController.text.trim();
+                final content = _contentController.text.trim();
+
+                if (title.isEmpty || content.isEmpty) return;
+                final note = Note(
+                  title: title,
+                  content: content,
+                  category: _selectedCategory, id: '', createdAt: DateTime.now().toIso8601String(), updatedAt:  DateTime.now().toIso8601String(),
+                );
+                Navigator.pop(context, note);
               },
-              child: const Text("Add Note"),
+              child: Text(
+                 'Save Note',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ),
