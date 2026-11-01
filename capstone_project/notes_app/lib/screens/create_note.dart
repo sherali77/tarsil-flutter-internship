@@ -124,7 +124,7 @@ class _CreateNoteState extends State<CreateNote> {
                 final note = Note(
                   title: title,
                   content: content,
-                  category: _selectedCategory, id: '', createdAt: DateTime.now().toIso8601String(), updatedAt:  DateTime.now().toIso8601String(),
+                  category: _selectedCategory, id: '', 
                 );
                 Navigator.pop(context, note);
               },

@@ -3,6 +3,7 @@ import 'package:notes_app/screens/api_service.dart';
 import 'package:notes_app/screens/create_note.dart';
 import 'package:notes_app/screens/model_class.dart';
 import 'package:notes_app/screens/note_details.dart';
+import 'package:notes_app/screens/settings.dart';
 import 'package:notes_app/services/storage_services.dart';
 
 import 'dart:async';
@@ -16,6 +17,7 @@ class HomePage extends StatefulWidget {
 
 class _HomeState extends State<HomePage> {
   List<Note> noteList = [];
+  List<Note> allNotes = [];
   final ApiService _apiService = ApiService();
   late Future _notesFuture;
   String quotes = "";
@@ -36,6 +38,7 @@ class _HomeState extends State<HomePage> {
   Future<void> _loadSavedNotes() async {
     final loadedNotes = await StorageService.loadNotes();
     setState(() {
+      allNotes = loadedNotes;
       noteList = loadedNotes;
     });
   }
@@ -46,6 +49,19 @@ class _HomeState extends State<HomePage> {
       quotes = quotesFetch['quote'] ?? '';
       _notesFuture = Future.value(quotesFetch);
     });
+  }
+
+  void searchNote(String keyword) {
+    if (keyword.isEmpty) {
+      noteList = allNotes;
+    } else {
+      noteList = allNotes
+          .where(
+            (note) => note.title.toLowerCase().contains(keyword.toLowerCase()),
+          )
+          .toList();
+    }
+    setState(() {});
   }
 
   @override
@@ -63,6 +79,18 @@ class _HomeState extends State<HomePage> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: Colors.white),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+              _loadSavedNotes();
+            },
+          ),
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,58 +142,74 @@ class _HomeState extends State<HomePage> {
                 if (quoteData == null || quoteData.isEmpty) {
                   return const SizedBox.shrink();
                 }
-                return Card(
-                  margin: const EdgeInsets.all(12.0),
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(
-                          Icons.format_quote,
-                          size: 24,
-                          color: Colors.amber,
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 20),
+                    TextField(
+                      onChanged: (value) => searchNote(value),
+                      decoration: InputDecoration(
+                        labelText: 'Search by Title',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '"${quoteData['quote']}"',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontStyle: FontStyle.italic,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  '— ${quoteData['author']}',
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.refresh, size: 18),
-                          onPressed: () => _loadQuotes(),
-                          tooltip: 'New Quote',
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+                    Card(
+                      margin: const EdgeInsets.all(12.0),
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.format_quote,
+                              size: 24,
+                              color: Colors.amber,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '"${quoteData['quote']}"',
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      '— ${quoteData['author']}',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.refresh, size: 18),
+                              onPressed: () => _loadQuotes(),
+                              tooltip: 'New Quote',
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 );
               }
               return const SizedBox.shrink();
@@ -175,55 +219,61 @@ class _HomeState extends State<HomePage> {
             child: noteList.isEmpty
                 ? const Center(
                     child: Text(
-                      'No notes yet — tap + to add one',
+                      'No notes yet',
                       style: TextStyle(color: Colors.grey, fontSize: 16),
                     ),
                   )
-                : RefreshIndicator(onRefresh: _loadSavedNotes,
-                   child: ListView.builder(
-                    itemCount: noteList.length,
-                    itemBuilder: (context, index) {
-                      final note = noteList[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: ListTile(
-                          title: Text(
-                            note.title,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                : RefreshIndicator(
+                    onRefresh: _loadSavedNotes,
+                    child: ListView.builder(
+                      itemCount: noteList.length,
+                      itemBuilder: (context, index) {
+                        final note = noteList[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
                           ),
-                          subtitle: Text(
-                            note.content,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          trailing: Chip(
-                            label: Text(
-                              note.category,
-                              style: const TextStyle(fontSize: 11),
-                            ),
-                          ),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return NoteDetails();
-                                },
+                          child: ListTile(
+                            title: Text(
+                              note.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
                               ),
-                            );
-                          },
-                        ),
-                      );
-                    },
+                            ),
+                            subtitle: Text(
+                              note.content,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            trailing: Chip(
+                              label: Text(
+                                note.category,
+                                style: const TextStyle(fontSize: 11),
+                              ),
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return NoteDetails(
+                                      index: index,
+                                      note: note,
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
           ),
         ],
       ),

@@ -12,7 +12,6 @@ class StorageService {
     );
     await prefs.setString(_key, encodedData);
   }
-
   static Future<List<Note>> loadNotes() async {
     final prefs = await SharedPreferences.getInstance();
     final String? encodedData = prefs.getString(_key);
@@ -20,5 +19,13 @@ class StorageService {
 
     final List<dynamic> decodedData = jsonDecode(encodedData);
     return decodedData.map((item) => Note.fromJson(item)).toList();
+  }
+  static Future<void> saveThemeMode(bool isDark) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDarkMode', isDark);
+  }
+  static Future<bool> loadThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isDarkMode') ?? false;
   }
 }

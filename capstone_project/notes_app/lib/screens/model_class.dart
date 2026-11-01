@@ -3,25 +3,26 @@ class Note {
   final String title;
   final String content;
   final String category;
-  final String createdAt;
-  final String updatedAt;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   Note({
     required this.id,
     required this.title,
     required this.content,
     required this.category,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+    DateTime? createdAt,
+    DateTime?  updatedAt,
+  }) : createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'title': title,
         'content': content,
         'category': category,
-        'createdAt': createdAt,
-        'updatedAt': updatedAt,
+        'createdAt': createdAt.toIso8601String(),
+        'updatedAt': updatedAt.toIso8601String(),
       };
 
   factory Note.fromJson(Map<String, dynamic> json) => Note(
@@ -29,7 +30,7 @@ class Note {
         title: json['title'] ?? '',
         content: json['content'] ?? '',
         category: json['category'] ?? 'Work',
-        createdAt: json['createdAt'] ?? '',
-        updatedAt: json['updatedAt'] ?? '',
+        createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+        updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),
       );
 }

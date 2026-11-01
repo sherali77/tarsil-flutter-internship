@@ -6,35 +6,25 @@ import 'package:notes_app/services/storage_services.dart';
 import 'dart:async';
 
 class NoteDetails extends StatefulWidget {
-  // List<Note> displayList=[];
-  const NoteDetails({super.key});
+  final Note note;
+  final int index;
+  const NoteDetails({super.key, required this.index, required this.note});
 
   @override
   State<NoteDetails> createState() => _Notedetails();
 }
 
 class _Notedetails extends State<NoteDetails> {
-  List<Note> displayList = [];
+  late Note currentNote;
 
   @override
   void initState() {
     super.initState();
-    _loadSavedNotes();
-    // _savedNotes();
+    currentNote = widget.note;
   }
-
-  Future<void> _loadSavedNotes() async {
-    final loadedNotes = await StorageService.loadNotes();
-    setState(() {
-      displayList = loadedNotes;
-    });
+  String _formatDate(DateTime dt) {
+    return "${dt.day}/${dt.month}/${dt.year} at ${dt.hour}:${dt.minute.toString().padLeft(2, '0')} ${dt.hour >= 12 ? 'PM' : 'AM'}";
   }
-
-  // Future<void> _savedNotes() async {
-  //   await StorageService.saveNotes(displayList);
-  //   setState(() {});
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,93 +35,114 @@ class _Notedetails extends State<NoteDetails> {
         ),
         centerTitle: true,
       ),
-      body: displayList.isEmpty
-          ? const Center(
-              child: Text(
-                'No notes yet',
-                style: TextStyle(color: Colors.grey, fontSize: 16),
-              ),
-            )
-          : ListView.builder(
-              itemCount: displayList.length,
-              itemBuilder: (context, index) {
-                final note = displayList[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      ListTile(
-                        title: Text(
-                          note.title,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(
-                          note.content,
-                          // overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: Chip(
-                          label: Text(
-                            note.category,
-                            style: const TextStyle(fontSize: 11),
-                          ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Card(
+          elevation: 3,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        currentNote.title,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          // Text("Time: ${note.createdAt.hour}:${note.createdAt.minute} | Date: ${note.createdAt.day}/${note.createdAt.month}}",),
-                          SizedBox(width: 20,),
-                          Text("${note.createdAt.toString()}"),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.edit,
-                              color: Colors.green,
-                              size: 20,
-                            ),
-                            onPressed: () async {
-                              final updatedNote = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    return CreateNote(
-                                      noteToEdit: note,
-                                      noteIndex: index,
-                                    );
-                                  },
-                                ),
+                    ),
+                    Chip(
+                      label: Text(
+                        currentNote.category,
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  "Created: ${_formatDate(currentNote.createdAt)}",
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+                if (currentNote.updatedAt.isAfter(currentNote.createdAt.add(const Duration(seconds: 5))))
+                  Text(
+                    "Updated: ${_formatDate(currentNote.updatedAt)}",
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+
+                const Divider(height: 30),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Text(
+                      currentNote.content,
+                      style: const TextStyle(fontSize: 16, height: 1.5),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.edit,
+                        color: Colors.green,
+                        size: 24,
+                      ),
+                      onPressed: () async {
+                        final updatedNote = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return CreateNote(
+                                noteToEdit: currentNote,
+                                noteIndex: widget.index,
                               );
-                              if (updatedNote != null && updatedNote is Note) {
-                                setState(() {
-                                  displayList[index] = updatedNote;
-                                });
-                                await StorageService.saveNotes(displayList);
-                              }
                             },
                           ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.delete,
-                              color: Colors.red,
-                              size: 20,
-                            ),
-                            onPressed: () async {
-                              setState(() {
-                                displayList.removeAt(index);
-                              });
-                              await StorageService.saveNotes(displayList);
-                            },
-                          ),
-                        ],
+                        );
+                        if (updatedNote != null && updatedNote is Note) {
+                          setState(() {
+                            currentNote = updatedNote;
+                          });
+                          final loadedNotes =
+                              await StorageService.loadNotes();
+                          loadedNotes[widget.index] = updatedNote;
+                          await StorageService.saveNotes(loadedNotes);
+                        }
+                      },
+                    ),
+                    const SizedBox(width: 12),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                        size: 24,
                       ),
-                    ],
-                  ),
-                );
-              },
+                      onPressed: () async {
+                        final loadedNotes =
+                            await StorageService.loadNotes();
+                        loadedNotes.removeAt(widget.index);
+                        await StorageService.saveNotes(loadedNotes);
+                        Navigator.pop(context); 
+                      },
+                    ),
+                  ],
+                ),
+              ],
             ),
+          ),
+        ),
+      ),
     );
   }
 }
