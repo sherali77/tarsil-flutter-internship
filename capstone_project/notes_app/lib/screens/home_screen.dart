@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:notes_app/screens/api_service.dart';
 import 'package:notes_app/screens/create_note.dart';
-import 'package:notes_app/screens/model_class.dart';
+import 'package:notes_app/models/model_class.dart';
 import 'package:notes_app/screens/note_details.dart';
 import 'package:notes_app/screens/settings.dart';
 import 'package:notes_app/services/storage_services.dart';
 
 import 'dart:async';
+
+import 'package:notes_app/widgets/empty_state.dart';
+import 'package:notes_app/widgets/note_card.dart';
+import 'package:notes_app/widgets/quote_section.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,36 +21,19 @@ class HomePage extends StatefulWidget {
 class _HomeState extends State<HomePage> {
   List<Note> noteList = [];
   List<Note> allNotes = [];
-  final ApiService _apiService = ApiService();
-  late Future _notesFuture;
-  String quotes = "";
 
   @override
   void initState() {
     super.initState();
     _loadSavedNotes();
-
-    _notesFuture = _apiService.fetchRandomQuote().then((quote) {
-      setState(() {
-        quotes = quote['quote'] ?? '';
-      });
-      return quote;
-    });
   }
 
   Future<void> _loadSavedNotes() async {
-    final loadedNotes = await StorageService.loadNotes();
+    final loadedNotes = await StorageService().loadNotes();
     setState(() {
       allNotes = loadedNotes;
       noteList = loadedNotes;
-    });
-  }
-
-  Future<void> _loadQuotes() async {
-    final quotesFetch = await _apiService.fetchRandomQuote();
-    setState(() {
-      quotes = quotesFetch['quote'] ?? '';
-      _notesFuture = Future.value(quotesFetch);
+      FocusScope.of(context).unfocus();
     });
   }
 
@@ -66,8 +52,9 @@ class _HomeState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    int newId = 1;
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      // backgroundColor: Colors.grey[100],
       appBar: AppBar(
         backgroundColor: Colors.amber[700],
         title: const Text(
@@ -95,181 +82,43 @@ class _HomeState extends State<HomePage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          FutureBuilder(
-            future: _notesFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              }
-              if (snapshot.hasError) {
-                return Card(
-                  margin: const EdgeInsets.all(12.0),
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          color: Colors.red,
-                          size: 28,
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          '${snapshot.error}'.replaceAll('Exception: ', ''),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 13),
-                        ),
-                        const SizedBox(height: 8),
-                        ElevatedButton.icon(
-                          onPressed: () => _loadQuotes(),
-                          icon: const Icon(Icons.refresh, size: 16),
-                          label: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-              if (snapshot.hasData) {
-                final quoteData = snapshot.data as Map<String, dynamic>?;
-                if (quoteData == null || quoteData.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(height: 20),
-                    TextField(
-                      onChanged: (value) => searchNote(value),
-                      decoration: InputDecoration(
-                        labelText: 'Search by Title',
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                    Card(
-                      margin: const EdgeInsets.all(12.0),
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.format_quote,
-                              size: 24,
-                              color: Colors.amber,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '"${quoteData['quote']}"',
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontStyle: FontStyle.italic,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Text(
-                                      '— ${quoteData['author']}',
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.refresh, size: 18),
-                              onPressed: () => _loadQuotes(),
-                              tooltip: 'New Quote',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              }
-              return const SizedBox.shrink();
-            },
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 20, 12, 0),
+            child: TextField(
+              onChanged: (value) {
+                searchNote(value);
+              },
+              decoration: InputDecoration(
+                labelText: 'Search by Title',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
           ),
+          const QuoteSection(),
           Expanded(
             child: noteList.isEmpty
-                ? const Center(
-                    child: Text(
-                      'No notes yet',
-                      style: TextStyle(color: Colors.grey, fontSize: 16),
-                    ),
-                  )
+                ? EmptyState()
                 : RefreshIndicator(
                     onRefresh: _loadSavedNotes,
                     child: ListView.builder(
                       itemCount: noteList.length,
                       itemBuilder: (context, index) {
                         final note = noteList[index];
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: ListTile(
-                            title: Text(
-                              note.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
+                        return NoteCard(
+                          note: note,
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    NoteDetails(note: note, index: index),
                               ),
-                            ),
-                            subtitle: Text(
-                              note.content,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            trailing: Chip(
-                              label: Text(
-                                note.category,
-                                style: const TextStyle(fontSize: 11),
-                              ),
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    return NoteDetails(
-                                      index: index,
-                                      note: note,
-                                    );
-                                  },
-                                ),
-                              );
-                            },
-                          ),
+                            );
+                            _loadSavedNotes();
+                          },
                         );
                       },
                     ),
@@ -277,25 +126,17 @@ class _HomeState extends State<HomePage> {
           ),
         ],
       ),
-
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.amber[700],
         child: const Icon(Icons.add, color: Colors.white, size: 30),
         onPressed: () async {
           final newNote = await Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) {
-                return const CreateNote();
-              },
-            ),
+            MaterialPageRoute(builder: (context) => const CreateNote()),
           );
-
           if (newNote != null && newNote is Note) {
-            setState(() {
-              noteList.add(newNote);
-            });
-            await StorageService.saveNotes(noteList);
+            await StorageService().addNote(newNote);
+            _loadSavedNotes();
           }
         },
       ),

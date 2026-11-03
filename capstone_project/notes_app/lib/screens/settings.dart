@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:notes_app/main.dart';
+import 'package:notes_app/models/model_class.dart';
 import 'package:notes_app/services/storage_services.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -10,6 +11,21 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  List<Note> deletedNotes = [];
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedNotes();
+  }
+
+  Future<void> _loadSavedNotes() async {
+    final loadedNotes = await StorageService().loadNotes();
+    setState(() {
+      loadedNotes.clear();
+      deletedNotes = loadedNotes;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isDarkMode = themeNotifier.value == ThemeMode.dark;
@@ -29,7 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               setState(() {
                 themeNotifier.value = value ? ThemeMode.dark : ThemeMode.light;
               });
-              await StorageService.saveThemeMode(value);
+              await StorageService().saveThemeMode(value);
             },
           ),
           const Divider(),
@@ -63,14 +79,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             TextButton(
               onPressed: () async {
-                await StorageService.saveNotes([]);
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('All notes deleted'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
+               await StorageService().clearAllNotes();
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('All notes deleted'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               },
               child: const Text(
                 'Delete All',

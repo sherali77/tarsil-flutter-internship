@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:notes_app/screens/create_note.dart';
-import 'package:notes_app/screens/model_class.dart';
+import 'package:notes_app/models/model_class.dart';
 import 'package:notes_app/services/storage_services.dart';
-
-import 'dart:async';
 
 class NoteDetails extends StatefulWidget {
   final Note note;
@@ -22,9 +20,11 @@ class _Notedetails extends State<NoteDetails> {
     super.initState();
     currentNote = widget.note;
   }
+
   String _formatDate(DateTime dt) {
     return "${dt.day}/${dt.month}/${dt.year} at ${dt.hour}:${dt.minute.toString().padLeft(2, '0')} ${dt.hour >= 12 ? 'PM' : 'AM'}";
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,11 +51,17 @@ class _Notedetails extends State<NoteDetails> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: Text(
-                        currentNote.title,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                      child: Hero(
+                        tag: 'note-title-${currentNote.id}',
+                        child: Material(
+                          color: Colors.transparent,
+                          child: Text(
+                            currentNote.title,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -72,7 +78,9 @@ class _Notedetails extends State<NoteDetails> {
                   "Created: ${_formatDate(currentNote.createdAt)}",
                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
-                if (currentNote.updatedAt.isAfter(currentNote.createdAt.add(const Duration(seconds: 5))))
+                if (currentNote.updatedAt.isAfter(
+                  currentNote.createdAt.add(const Duration(seconds: 5)),
+                ))
                   Text(
                     "Updated: ${_formatDate(currentNote.updatedAt)}",
                     style: const TextStyle(color: Colors.grey, fontSize: 12),
@@ -81,9 +89,17 @@ class _Notedetails extends State<NoteDetails> {
                 const Divider(height: 30),
                 Expanded(
                   child: SingleChildScrollView(
-                    child: Text(
-                      currentNote.content,
-                      style: const TextStyle(fontSize: 16, height: 1.5),
+                    child: Hero(
+                      tag: 'note-content-${currentNote.id}',
+                      child: Material(
+                        color: Colors.transparent,
+                        child: Text(
+                          currentNote.content,
+                          style: const TextStyle(
+                            fontSize: 17,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -114,10 +130,7 @@ class _Notedetails extends State<NoteDetails> {
                           setState(() {
                             currentNote = updatedNote;
                           });
-                          final loadedNotes =
-                              await StorageService.loadNotes();
-                          loadedNotes[widget.index] = updatedNote;
-                          await StorageService.saveNotes(loadedNotes);
+                          await StorageService().updateNote(updatedNote);
                         }
                       },
                     ),
@@ -129,11 +142,8 @@ class _Notedetails extends State<NoteDetails> {
                         size: 24,
                       ),
                       onPressed: () async {
-                        final loadedNotes =
-                            await StorageService.loadNotes();
-                        loadedNotes.removeAt(widget.index);
-                        await StorageService.saveNotes(loadedNotes);
-                        Navigator.pop(context); 
+                        await StorageService().deleteNote(currentNote.id);
+                        Navigator.pop(context);
                       },
                     ),
                   ],

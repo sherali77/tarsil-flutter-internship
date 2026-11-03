@@ -5,7 +5,7 @@ import 'package:notes_app/services/storage_services.dart';
 ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 
 void main() async {
-  bool isDarkSaved = await StorageService.loadThemeMode();
+  bool isDarkSaved = await StorageService().loadThemeMode();
   themeNotifier.value = isDarkSaved ? ThemeMode.dark : ThemeMode.light;
   runApp(const MyApp());
 }
