@@ -47,7 +47,6 @@ class _CreateNoteState extends State<CreateNote> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: Colors.grey[100],
       appBar: AppBar(
         backgroundColor: Colors.amber[700],
         title: Text(

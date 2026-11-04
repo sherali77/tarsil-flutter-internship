@@ -12,21 +12,10 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  // List<Note> deletedNotes = [];
   @override
   void initState() {
     super.initState();
-    _loadSavedNotes();
   }
-
-  Future<void> _loadSavedNotes() async {
-    final loadedNotes = await StorageService().loadNotes();
-    setState(() {
-      loadedNotes.clear();
-      // deletedNotes = loadedNotes;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     bool isDarkMode = themeNotifier.value == ThemeMode.dark;
