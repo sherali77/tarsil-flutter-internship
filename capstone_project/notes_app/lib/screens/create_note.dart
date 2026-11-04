@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:notes_app/models/model_class.dart';
+import 'package:notes_app/services/storage_services.dart';
+import 'package:notes_app/widgets/validator.dart';
 
 class CreateNote extends StatefulWidget {
   final Note? noteToEdit;
@@ -29,7 +31,7 @@ class _CreateNoteState extends State<CreateNote> {
     _contentController = TextEditingController(
       text: widget.noteToEdit != null ? widget.noteToEdit!.content : '',
     );
-    
+
     if (widget.noteToEdit != null) {
       _selectedCategory = widget.noteToEdit!.category;
     }
@@ -50,10 +52,7 @@ class _CreateNoteState extends State<CreateNote> {
         backgroundColor: Colors.amber[700],
         title: Text(
           widget.noteToEdit == null ? 'Create Note' : 'Edit Note',
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -73,15 +72,7 @@ class _CreateNoteState extends State<CreateNote> {
                   ),
                 ),
                 style: const TextStyle(fontWeight: FontWeight.bold),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Title cannot be empty!';
-                  }
-                  if (value.trim().length < 3) {
-                    return 'Title must be at least 3 characters long!';
-                  }
-                  return null;
-                },
+                validator: Validator().validateTitle,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -95,12 +86,6 @@ class _CreateNoteState extends State<CreateNote> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Content cannot be empty!';
-                  }
-                  return null;
-                },
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
@@ -130,20 +115,21 @@ class _CreateNoteState extends State<CreateNote> {
                   backgroundColor: Colors.amber[700],
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     final title = _titleController.text.trim();
                     final content = _contentController.text.trim();
 
-                    final note = Note( 
+                    final note = Note(
                       title: title,
                       content: content,
                       category: _selectedCategory,
-                      createdAt: widget.noteToEdit != null ? widget.noteToEdit!.createdAt : DateTime.now(),
-                      updatedAt: DateTime.now(), 
+                      createdAt: widget.noteToEdit != null
+                          ? widget.noteToEdit!.createdAt
+                          : DateTime.now(),
+                      updatedAt: DateTime.now(),
                       id: widget.noteToEdit != null ? widget.noteToEdit!.id : 0,
                     );
-
                     Navigator.pop(context, note);
                   }
                 },

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:notes_app/main.dart';
 import 'package:notes_app/models/model_class.dart';
 import 'package:notes_app/services/storage_services.dart';
+import 'package:notes_app/widgets/delete_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -11,7 +12,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  List<Note> deletedNotes = [];
+  // List<Note> deletedNotes = [];
   @override
   void initState() {
     super.initState();
@@ -22,7 +23,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final loadedNotes = await StorageService().loadNotes();
     setState(() {
       loadedNotes.clear();
-      deletedNotes = loadedNotes;
+      // deletedNotes = loadedNotes;
     });
   }
 
@@ -57,50 +58,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             subtitle: const Text('Permanently clear all saved notes'),
             onTap: () {
-              _showDeleteConfirmationDialog(context);
+              DeleteDialog().showDeleteConfirmationDialog(context);
             },
           ),
         ],
       ),
-    );
-  }
-
-  void _showDeleteConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Delete All Notes'),
-          content: const Text('Are you sure to delete all notes?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-               await StorageService().clearAllNotes();
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('All notes deleted'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
-              child: const Text(
-                'Delete All',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

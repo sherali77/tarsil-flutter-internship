@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:notes_app/screens/create_note.dart';
 import 'package:notes_app/models/model_class.dart';
 import 'package:notes_app/services/storage_services.dart';
+import 'package:notes_app/widgets/format_date.dart';
 
 class NoteDetails extends StatefulWidget {
   final Note note;
@@ -19,10 +20,6 @@ class _Notedetails extends State<NoteDetails> {
   void initState() {
     super.initState();
     currentNote = widget.note;
-  }
-
-  String _formatDate(DateTime dt) {
-    return "${dt.day}/${dt.month}/${dt.year} at ${dt.hour}:${dt.minute.toString().padLeft(2, '0')} ${dt.hour >= 12 ? 'PM' : 'AM'}";
   }
 
   @override
@@ -75,14 +72,14 @@ class _Notedetails extends State<NoteDetails> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  "Created: ${_formatDate(currentNote.createdAt)}",
+                  "Created: ${FormatDate.format(currentNote.createdAt)}",
                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
                 if (currentNote.updatedAt.isAfter(
                   currentNote.createdAt.add(const Duration(seconds: 5)),
                 ))
                   Text(
-                    "Updated: ${_formatDate(currentNote.updatedAt)}",
+                    "Updated: ${FormatDate.format(currentNote.updatedAt)}",
                     style: const TextStyle(color: Colors.grey, fontSize: 12),
                   ),
 

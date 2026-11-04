@@ -29,7 +29,7 @@ class Note {
         id: json['id'] ?? '',
         title: json['title'] ?? '',
         content: json['content'] ?? '',
-        category: json['category'] ?? 'Work',
+        category: json['category'] ?? '',
         createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
         updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),
       );

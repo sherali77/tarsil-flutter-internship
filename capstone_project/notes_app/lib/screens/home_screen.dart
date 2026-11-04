@@ -20,7 +20,8 @@ class HomePage extends StatefulWidget {
 
 class _HomeState extends State<HomePage> {
   List<Note> noteList = [];
-  List<Note> allNotes = [];
+  String _selectedCategory = 'All';
+  String _searchKeyword = '';
 
   @override
   void initState() {
@@ -29,30 +30,31 @@ class _HomeState extends State<HomePage> {
   }
 
   Future<void> _loadSavedNotes() async {
-    final loadedNotes = await StorageService().loadNotes();
+    final notes = await StorageService().loadNotes();
+    if (!mounted) return;
     setState(() {
-      allNotes = loadedNotes;
-      noteList = loadedNotes;
-      FocusScope.of(context).unfocus();
+      noteList = notes.where((note) {
+        final matchesCategory = _selectedCategory == 'All' || note.category == _selectedCategory;
+        final matchesSearch = note.title.toLowerCase().contains(
+          _searchKeyword.toLowerCase(),
+        );
+        return matchesCategory && matchesSearch;
+      }).toList();
     });
   }
 
   void searchNote(String keyword) {
-    if (keyword.isEmpty) {
-      noteList = allNotes;
-    } else {
-      noteList = allNotes
-          .where(
-            (note) => note.title.toLowerCase().contains(keyword.toLowerCase()),
-          )
-          .toList();
-    }
-    setState(() {});
+    _searchKeyword = keyword;
+    _loadSavedNotes();
+  }
+
+  void filterNotesByCategory(String category) {
+    _selectedCategory = category;
+    _loadSavedNotes();
   }
 
   @override
   Widget build(BuildContext context) {
-    int newId = 1;
     return Scaffold(
       // backgroundColor: Colors.grey[100],
       appBar: AppBar(
@@ -91,6 +93,28 @@ class _HomeState extends State<HomePage> {
               decoration: InputDecoration(
                 labelText: 'Search by Title',
                 prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+            child: DropdownButtonFormField<String>(
+              value: _selectedCategory,
+              items: const [
+                DropdownMenuItem(value: 'All', child: Text('All Categories')),
+                DropdownMenuItem(value: 'Work', child: Text('Work')),
+                DropdownMenuItem(value: 'Personal', child: Text('Personal')),
+                DropdownMenuItem(value: 'Study', child: Text('Study')),
+              ],
+              onChanged: (value) {
+                filterNotesByCategory(value ?? 'All');
+              },
+              decoration: InputDecoration(
+                labelText: 'Filter by Category',
+                prefixIcon: const Icon(Icons.filter_list),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
