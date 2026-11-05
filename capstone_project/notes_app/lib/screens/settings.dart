@@ -18,26 +18,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    bool isDarkMode = themeNotifier.value == ThemeMode.dark;
+    // bool isDarkMode = themeNotifier.value == ThemeMode.dark;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings'), centerTitle: true),
       body: ListView(
         children: [
           const SizedBox(height: 10),
-          SwitchListTile(
-            secondary: const Icon(Icons.dark_mode),
-            title: const Text('Dark Mode'),
-            subtitle: const Text('Switch between Light and Dark theme'),
-            value: isDarkMode,
-            activeColor: Colors.amber,
-            onChanged: (bool value) async {
-              setState(() {
-                themeNotifier.value = value ? ThemeMode.dark : ThemeMode.light;
-              });
-              await StorageService().saveThemeMode(value);
-            },
-          ),
+          // SwitchListTile(
+          //   secondary: const Icon(Icons.dark_mode),
+          //   title: const Text('Dark Mode'),
+          //   subtitle: const Text('Switch between Light and Dark theme'),
+          //   // value: isDarkMode,
+          //   activeColor: Colors.amber,
+          //   onChanged: (bool value) async {
+          //     setState(() {
+          //       // themeNotifier.value = value ? ThemeMode.dark : ThemeMode.light;
+          //     });
+          //     await StorageService().saveThemeMode(value);
+          //   },
+          // ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.delete_sweep, color: Colors.red),

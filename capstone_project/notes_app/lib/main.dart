@@ -1,50 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:notes_app/providers/quote_provider.dart';
 import 'package:notes_app/screens/home_screen.dart';
 import 'package:notes_app/services/storage_services.dart';
+import 'package:notes_app/providers/theme_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:notes_app/providers/notes_provider.dart';
 
-ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
-
-void main() async {
-  bool isDarkSaved = await StorageService().loadThemeMode();
-  themeNotifier.value = isDarkSaved ? ThemeMode.dark : ThemeMode.light;
-  runApp(const MyApp());
+class NotesApp extends StatelessWidget {
+  const NotesApp({super.key});
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const NotesApp());
 }
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: themeNotifier,
-      builder: (context, currentThemeMode, child) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Notes App',
-          theme: ThemeData(
-            brightness: Brightness.light,
-            primarySwatch: Colors.amber,
-            scaffoldBackgroundColor: Colors.grey[100],
-            appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.amber,
-              foregroundColor: Colors.white,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => NotesProvider()),
+        ChangeNotifierProvider(create: (_) => QuoteProvider()),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeNotifier, child) {
+          return MaterialApp(
+            title: 'Notes App',
+            themeMode: themeNotifier.themeMode,
+            theme: ThemeData(
+              primarySwatch: Colors.amber,
+              brightness: Brightness.light,
             ),
-          ),
-          darkTheme: ThemeData(
-            brightness: Brightness.dark,
-            primarySwatch: Colors.amber,
-            scaffoldBackgroundColor: const Color(0xFF121212),
-            appBarTheme: const AppBarTheme(
-              backgroundColor: Color(0xFF1F1F1F),
-              foregroundColor: Colors.white,
+            darkTheme: ThemeData(
+              primarySwatch: Colors.amber,
+              brightness: Brightness.dark,
             ),
-            cardColor: const Color(0xFF1E1E1E),
-          ),
-
-          themeMode: currentThemeMode, 
-          home: const HomePage(),
-        );
-      },
+            home: const HomePage(),
+          );
+        },
+      ),
     );
   }
 }
