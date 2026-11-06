@@ -6,11 +6,10 @@ import 'package:http/http.dart' as http;
 class ApiException implements Exception {
   final String message;
   const ApiException(this.message);
-
+  
   @override
   String toString() => message;
 }
-
 class ApiService {
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;

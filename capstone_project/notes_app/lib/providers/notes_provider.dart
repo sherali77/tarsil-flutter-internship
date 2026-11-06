@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:notes_app/models/model_class.dart';
+import 'package:notes_app/repositories/notes_repo.dart';
 import 'package:notes_app/services/storage_services.dart';
 
 class NotesProvider extends ChangeNotifier {
+  final notesRepo = NotesRepo();
   bool _isloading = false;
   List<Note> _notes = [];
   get isLoading => _isloading;
@@ -14,14 +16,14 @@ class NotesProvider extends ChangeNotifier {
 
   Future<void> LoadNotes() async {
     setLoading(true);
-    _notes = await StorageService().loadNotes();
+    _notes = await notesRepo.getNotes();
     setLoading(false);
     notifyListeners();
   }
 
   Future<void> addNote(Note newNote) async {
     setLoading(true);
-    await StorageService().addNote(newNote);
+    await notesRepo.addNote(newNote);
     await LoadNotes();
     setLoading(false);
     notifyListeners();
@@ -29,7 +31,7 @@ class NotesProvider extends ChangeNotifier {
 
   Future<void> updateNote(Note updateNote) async {
     setLoading(true);
-    await StorageService().updateNote(updateNote);
+    await notesRepo.updateNote(updateNote);
     await LoadNotes();
     setLoading(false);
     notifyListeners();
@@ -37,7 +39,7 @@ class NotesProvider extends ChangeNotifier {
 
   Future<void> deleteNote(int id) async {
     setLoading(true);
-    await StorageService().deleteNote(id);
+    await notesRepo.deleteNote(id);
     await LoadNotes();
     setLoading(false);
     notifyListeners();
@@ -45,9 +47,8 @@ class NotesProvider extends ChangeNotifier {
 
   Future<void> deleteAllNotes() async {
     setLoading(true);
-    await StorageService().clearAllNotes();
-    await LoadNotes();
+    await notesRepo.deleteAllNotes(notes);
+    _notes.clear();
     setLoading(false);
-    notifyListeners();
   }
 }

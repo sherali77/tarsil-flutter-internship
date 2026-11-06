@@ -3,13 +3,12 @@ import 'package:notes_app/screens/create_note.dart';
 import 'package:notes_app/models/model_class.dart';
 import 'package:notes_app/screens/note_details.dart';
 import 'package:notes_app/screens/settings.dart';
-import 'package:notes_app/services/storage_services.dart';
-
 import 'dart:async';
-
 import 'package:notes_app/widgets/empty_state.dart';
 import 'package:notes_app/widgets/note_card.dart';
 import 'package:notes_app/widgets/quote_section.dart';
+import 'package:notes_app/providers/notes_provider.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,38 +18,26 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomeState extends State<HomePage> {
-  List<Note> noteList = [];
   String _selectedCategory = 'All';
   String _searchKeyword = '';
 
   @override
   void initState() {
     super.initState();
-    _loadSavedNotes();
-  }
-
-  Future<void> _loadSavedNotes() async {
-    final notes = await StorageService().loadNotes();
-    if (!mounted) return;
-    setState(() {
-      noteList = notes.where((note) {
-        final matchesCategory = _selectedCategory == 'All' || note.category == _selectedCategory;
-        final matchesSearch = note.title.toLowerCase().contains(
-          _searchKeyword.toLowerCase(),
-        );
-        return matchesCategory && matchesSearch;
-      }).toList();
+    Future.microtask(() {
+      Provider.of<NotesProvider>(context, listen: false).LoadNotes();
     });
   }
 
   void searchNote(String keyword) {
-    _searchKeyword = keyword;
-    _loadSavedNotes();
+    setState(() {
+      _searchKeyword = keyword;
+    });
   }
-
   void filterNotesByCategory(String category) {
-    _selectedCategory = category;
-    _loadSavedNotes();
+    setState(() {
+      _selectedCategory = category;
+    });
   }
 
   @override
@@ -75,7 +62,7 @@ class _HomeState extends State<HomePage> {
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
-              _loadSavedNotes();
+              Provider.of<NotesProvider>(context, listen: false).LoadNotes();
             },
           ),
         ],
@@ -121,31 +108,50 @@ class _HomeState extends State<HomePage> {
             ),
           ),
           const QuoteSection(),
+          const SizedBox(height: 15),
           Expanded(
-            child: noteList.isEmpty
-                ? EmptyState()
-                : RefreshIndicator(
-                    onRefresh: _loadSavedNotes,
-                    child: ListView.builder(
-                      itemCount: noteList.length,
-                      itemBuilder: (context, index) {
-                        final note = noteList[index];
-                        return NoteCard(
-                          note: note,
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    NoteDetails(note: note, index: index),
-                              ),
+            child: Consumer<NotesProvider>(
+              builder: (context, notesProvider, child) {
+                var noteList = notesProvider.notes;
+                if (_selectedCategory != 'All') {
+                  noteList = noteList.where((n) => n.category == _selectedCategory).toList();
+                }
+                if (_searchKeyword.isNotEmpty) {
+                  noteList = noteList.where((n) => n.title.toLowerCase().contains(_searchKeyword.toLowerCase())).toList();
+                }
+                return noteList.isEmpty ? const EmptyState() :
+                   RefreshIndicator(
+                        onRefresh: () async {
+                          await Provider.of<NotesProvider>(
+                            context,
+                            listen: false,
+                          ).LoadNotes();
+                        },
+                        child: ListView.builder(
+                          itemCount: noteList.length,
+                          itemBuilder: (context, index) {
+                            final note = noteList[index];
+                            return NoteCard(
+                              note: note,
+                              onTap: () async {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        NoteDetails(note: note, index: index),
+                                  ),
+                                );
+                                Provider.of<NotesProvider>(
+                                  context,
+                                  listen: false,
+                                ).LoadNotes();
+                              },
                             );
-                            _loadSavedNotes();
                           },
-                        );
-                      },
-                    ),
-                  ),
+                        ),
+                      );
+              },
+            ),
           ),
         ],
       ),
@@ -158,8 +164,10 @@ class _HomeState extends State<HomePage> {
             MaterialPageRoute(builder: (context) => const CreateNote()),
           );
           if (newNote != null && newNote is Note) {
-            await StorageService().addNote(newNote);
-            _loadSavedNotes();
+            await Provider.of<NotesProvider>(
+              context,
+              listen: false,
+            ).addNote(newNote);
           }
         },
       ),

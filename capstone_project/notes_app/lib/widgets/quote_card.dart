@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:notes_app/models/quote_model.dart'; 
 
 class QuoteCard extends StatelessWidget {
-  final String quote;
-  final String author;
+  final Quote quoteObj; 
   final VoidCallback onRefresh;
 
   const QuoteCard({
     super.key,
-    required this.quote,
-    required this.author,
+    required this.quoteObj,
     required this.onRefresh,
   });
 
@@ -29,13 +28,13 @@ class QuoteCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('"$quote"',
+                  Text('"${quoteObj.quote}"',
                       style: const TextStyle(
                           fontSize: 13, fontStyle: FontStyle.italic)),
                   const SizedBox(height: 6),
                   Align(
                     alignment: Alignment.centerRight,
-                    child: Text('— $author',
+                    child: Text('— ${quoteObj.author}',
                         style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,

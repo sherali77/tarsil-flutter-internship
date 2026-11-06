@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:notes_app/services/api_service.dart';
+import 'package:notes_app/models/quote_model.dart';
+import 'package:notes_app/repositories/quote_repo.dart';
 
 class QuoteProvider extends ChangeNotifier {
+  final quoteRepo = QuoteRepo();
   bool _isLoading = false;
   String _errorMsg = '';
   String _quote = '';
@@ -12,11 +14,12 @@ class QuoteProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   Future<void> fetchQuote() async {
     _isLoading = true;
+    _errorMsg = "";
     notifyListeners();
     try {
-      final quoteData = await ApiService().fetchRandomQuote();
-      _quote = quoteData['content'] ?? '';
-      _author = quoteData['author'] ?? '';
+      Quote quoteData = await quoteRepo.fetchQuote();
+      _quote = quoteData.quote;
+      _author = quoteData.author;
       _errorMsg = '';
     } catch (e) {
       _errorMsg = e.toString();

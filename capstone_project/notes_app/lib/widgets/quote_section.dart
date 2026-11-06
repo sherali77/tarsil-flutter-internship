@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:notes_app/models/quote_model.dart';
 import 'package:notes_app/providers/quote_provider.dart';
-// import 'package:notes_app/services/api_service.dart';
 import 'package:notes_app/widgets/quote_card.dart';
 import 'package:provider/provider.dart';
-
 class QuoteSection extends StatefulWidget {
   const QuoteSection({super.key});
 
@@ -31,8 +30,10 @@ class _QuoteSectionState extends State<QuoteSection> {
           return Center(child: Text(quoteProvider.errorMsg));
         } else {
           return QuoteCard(
-            quote: quoteProvider.quote,
-            author: quoteProvider.author, 
+            quoteObj: Quote(
+              quote: quoteProvider.quote,
+              author: quoteProvider.author,
+            ),
             onRefresh: _refresh,
           );
         }

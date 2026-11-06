@@ -6,12 +6,14 @@ import 'package:notes_app/providers/theme_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:notes_app/providers/notes_provider.dart';
 
-class NotesApp extends StatelessWidget {
-  const NotesApp({super.key});
-void main() async{
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const NotesApp());
 }
+
+class NotesApp extends StatelessWidget {
+  const NotesApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -23,6 +25,7 @@ void main() async{
       child: Consumer<ThemeProvider>(
         builder: (context, themeNotifier, child) {
           return MaterialApp(
+            debugShowCheckedModeBanner: false,
             title: 'Notes App',
             themeMode: themeNotifier.themeMode,
             theme: ThemeData(
