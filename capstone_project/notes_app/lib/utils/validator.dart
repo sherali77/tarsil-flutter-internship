@@ -1,5 +1,3 @@
-import 'package:notes_app/models/model_class.dart';
-
 class Validator {
   String? validateTitle(String? value) {
     if (value == null || value.trim().isEmpty) {

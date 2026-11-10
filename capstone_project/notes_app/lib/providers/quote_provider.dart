@@ -3,23 +3,24 @@ import 'package:notes_app/models/quote_model.dart';
 import 'package:notes_app/repositories/quote_repo.dart';
 
 class QuoteProvider extends ChangeNotifier {
-  final quoteRepo = QuoteRepo();
+  final QuoteRepo quoteRepo;
+  QuoteProvider({required this.quoteRepo});
   bool _isLoading = false;
   String _errorMsg = '';
-  String _quote = '';
-  String _author = '';
-  String get quote => _quote;
-  String get author => _author;
+  Quote? _quoteData;
+  String get quote => _quoteData?.quote ?? '';
+  String get author => _quoteData?.author ?? '';
   String get errorMsg => _errorMsg;
   bool get isLoading => _isLoading;
+  
   Future<void> fetchQuote() async {
+    if (_isLoading) return;
     _isLoading = true;
     _errorMsg = "";
     notifyListeners();
     try {
       Quote quoteData = await quoteRepo.fetchQuote();
-      _quote = quoteData.quote;
-      _author = quoteData.author;
+      _quoteData = quoteData;
       _errorMsg = '';
     } catch (e) {
       _errorMsg = e.toString();

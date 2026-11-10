@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:notes_app/models/model_class.dart';
+import 'package:notes_app/models/note.dart';
 
 class NoteCard extends StatelessWidget {
   final Note note;
@@ -40,7 +40,6 @@ class NoteCard extends StatelessWidget {
             '${note.id}',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              // color: Colors.black87,
             ),
           ),
         ),

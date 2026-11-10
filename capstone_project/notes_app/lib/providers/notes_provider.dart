@@ -1,54 +1,119 @@
 import 'package:flutter/material.dart';
-import 'package:notes_app/models/model_class.dart';
+import 'package:notes_app/models/note.dart';
 import 'package:notes_app/repositories/notes_repo.dart';
-import 'package:notes_app/services/storage_services.dart';
 
 class NotesProvider extends ChangeNotifier {
-  final notesRepo = NotesRepo();
+  final NotesRepo notesRepo;
+  NotesProvider({required this.notesRepo});
   bool _isloading = false;
   List<Note> _notes = [];
-  get isLoading => _isloading;
-  get notes => _notes;
+  String? _errorMessage;
+
+  bool get isLoading => _isloading;
+  List<Note> get notes => List.unmodifiable(_notes);
+
   void setLoading(bool value) {
     _isloading = value;
     notifyListeners();
   }
 
-  Future<void> LoadNotes() async {
+  String? get errorMessage => _errorMessage;
+
+  Future<void> loadNotes() async {
+    if (_isloading) return; 
     setLoading(true);
-    _notes = await notesRepo.getNotes();
+    try {
+      _notes = await notesRepo.getNotes();
+      _errorMessage = null;
+    } catch (e) {
+      _errorMessage = e.toString();
+    }
     setLoading(false);
-    notifyListeners();
+  }
+
+  Future<void> searchNotes(String keyword) async {
+    if (_isloading) return;
+    setLoading(true);
+    try {
+      List<Note> allNotes = await notesRepo.getNotes();
+      _notes = allNotes
+          .where(
+            (note) => note.title.toLowerCase().contains(keyword.toLowerCase()),
+          )
+          .toList();
+      _errorMessage = null;
+    } catch (e) {
+      _errorMessage = e.toString();
+    }
+    setLoading(false);
+  }
+
+  Future<void> filterNotesByCategory(String category) async {
+    if (_isloading) return;
+    setLoading(true);
+    try {
+      List<Note> allNotes = await notesRepo.getNotes();
+      if (category == 'All') {
+        _notes = allNotes;
+      } else {
+        _notes = allNotes.where((note) => note.category == category).toList();
+      }
+      _errorMessage = null;
+    } catch (e) {
+      _errorMessage = e.toString();
+    }
+    setLoading(false);
   }
 
   Future<void> addNote(Note newNote) async {
+    if (_isloading) return;
     setLoading(true);
-    await notesRepo.addNote(newNote);
-    await LoadNotes();
+    try {
+      await notesRepo.addNote(newNote);
+      _notes = await notesRepo.getNotes();
+      _errorMessage = null;
+    } catch (e) {
+      _errorMessage = e.toString();
+    }
     setLoading(false);
-    notifyListeners();
   }
 
   Future<void> updateNote(Note updateNote) async {
+    if (_isloading) return;
     setLoading(true);
-    await notesRepo.updateNote(updateNote);
-    await LoadNotes();
+    try {
+      await notesRepo.updateNote(updateNote);
+      _notes = await notesRepo.getNotes(); 
+      _errorMessage = null;
+    } catch (e) {
+      _errorMessage = e.toString();
+    }
     setLoading(false);
-    notifyListeners();
   }
 
   Future<void> deleteNote(int id) async {
+    if (_isloading) return;
     setLoading(true);
-    await notesRepo.deleteNote(id);
-    await LoadNotes();
+    try {
+      await notesRepo.deleteNote(id);
+      _notes = await notesRepo.getNotes();
+      _errorMessage = null;
+    } catch (e) {
+      _errorMessage = e.toString();
+    }
     setLoading(false);
-    notifyListeners();
   }
 
   Future<void> deleteAllNotes() async {
+    if (_isloading) return;
     setLoading(true);
-    await notesRepo.deleteAllNotes(notes);
-    _notes.clear();
+    try {
+      await notesRepo.deleteAllNotes();
+      _notes.clear();
+      _errorMessage = null;
+    } catch (e) {
+      _errorMessage = e.toString();
+    }
     setLoading(false);
   }
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:notes_app/models/model_class.dart';
-import 'package:notes_app/services/storage_services.dart';
-import 'package:notes_app/widgets/validator.dart';
+import 'package:notes_app/models/note.dart';
+import 'package:notes_app/providers/notes_provider.dart';
+import 'package:notes_app/utils/validator.dart';
+import 'package:provider/provider.dart';
 
 class CreateNote extends StatefulWidget {
   final Note? noteToEdit;
@@ -129,6 +130,7 @@ class _CreateNoteState extends State<CreateNote> {
                       updatedAt: DateTime.now(),
                       id: widget.noteToEdit != null ? widget.noteToEdit!.id : 0,
                     );
+                    Provider.of<NotesProvider>(context, listen: false).addNote(note);
                     Navigator.pop(context, note);
                   }
                 },

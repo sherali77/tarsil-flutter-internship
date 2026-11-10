@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:notes_app/providers/quote_provider.dart';
+import 'package:notes_app/repositories/notes_repo.dart';
+import 'package:notes_app/repositories/quote_repo.dart';
+import 'package:notes_app/repositories/theme_repo.dart';
 import 'package:notes_app/screens/home_screen.dart';
-import 'package:notes_app/services/storage_services.dart';
 import 'package:notes_app/providers/theme_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:notes_app/providers/notes_provider.dart';
@@ -18,9 +20,9 @@ class NotesApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => NotesProvider()),
-        ChangeNotifierProvider(create: (_) => QuoteProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider(themeRepo: ThemeRepo())),
+        ChangeNotifierProvider(create: (_) => NotesProvider(notesRepo: NotesRepo())),
+        ChangeNotifierProvider(create: (_) => QuoteProvider(quoteRepo: QuoteRepo())),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeNotifier, child) {

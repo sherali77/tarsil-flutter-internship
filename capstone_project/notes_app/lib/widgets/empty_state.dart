@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
 
 class EmptyState extends StatelessWidget {
-  const EmptyState({super.key});
+  final String message; 
+
+  const EmptyState({
+    super.key,
+    required this.message, 
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.note,
             size: 80,
             color: Colors.grey,
           ),
+          const SizedBox(height: 12), 
           Text(
-            'No notes yet — tap + to add one',
-            style: TextStyle(color: Colors.grey, fontSize: 16),
+            message, 
+            style: const TextStyle(color: Colors.grey, fontSize: 16),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

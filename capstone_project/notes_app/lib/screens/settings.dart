@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:notes_app/main.dart';
-import 'package:notes_app/models/model_class.dart';
 import 'package:notes_app/providers/theme_provider.dart';
-import 'package:notes_app/services/storage_services.dart';
 import 'package:notes_app/widgets/delete_dialog.dart';
 import 'package:provider/provider.dart';
 
@@ -17,33 +14,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<ThemeProvider>(context, listen: false).loadThemeMode();
+    Future.microtask(() {
+      Provider.of<ThemeProvider>(context, listen: false).loadThemeMode();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // bool isDarkMode = themeNotifier.value == ThemeMode.dark;
-
     return Scaffold(
       appBar: AppBar(title: const Text('Settings'), centerTitle: true),
       body: Consumer<ThemeProvider>(
-        builder: (context, value, child) {
+        builder: (context, themeProvider, child) {
+          bool isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+
           return ListView(
             children: [
               const SizedBox(height: 10),
-              // SwitchListTile(
-              //   secondary: const Icon(Icons.dark_mode),
-              //   title: const Text('Dark Mode'),
-              //   subtitle: const Text('Switch between Light and Dark theme'),
-              //   // value: isDarkMode,
-              //   activeColor: Colors.amber,
-              //   onChanged: (bool value) async {
-              //     setState(() {
-              //       // themeNotifier.value = value ? ThemeMode.dark : ThemeMode.light;
-              //     });
-              //     await StorageService().saveThemeMode(value);
-              //   },
-              // ),
+              SwitchListTile(
+                secondary: const Icon(Icons.dark_mode),
+                title: const Text('Dark Mode'),
+                subtitle: const Text('Switch between Light and Dark theme'),
+                value: isDarkMode,
+                activeColor: Colors.amber,
+                onChanged: (bool value) async {
+                  await themeProvider.toggleTheme(value);
+                },
+              ),
+
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.delete_sweep, color: Colors.red),
@@ -56,7 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 subtitle: const Text('Permanently clear all saved notes'),
                 onTap: () {
-                  // DeleteDialog().showDeleteConfirmationDialog(context);
+                  DeleteDialog().showDeleteConfirmationDialog(context);
                 },
               ),
             ],

@@ -1,5 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:notes_app/models/model_class.dart';
+import 'package:notes_app/models/note.dart';
 
 import 'dart:convert';
 
@@ -16,7 +16,7 @@ class StorageService {
     _prefs ??= await SharedPreferences.getInstance();
   }
 
-  Future<void>saveNotesToPrefs(List<Note> notes) async {
+  Future<void> saveNotesToPrefs(List<Note> notes) async {
     await _initPrefs();
     List<String> noteStringList = notes
         .map((note) => jsonEncode(note.toJson()))
@@ -32,7 +32,52 @@ class StorageService {
         .map((noteString) => Note.fromJson(jsonDecode(noteString)))
         .toList();
   }
-    
+
+  Future<void> insertNote(Note newNote) async {
+    await _initPrefs();
+    List<Note> notes = await loadNotes();
+
+    int newId = 1;
+    if (notes.isNotEmpty) {
+      int maxId = notes.map((n) => n.id).reduce((a, b) => a > b ? a : b);
+      newId = maxId + 1;
+    }
+
+    final noteWithId = Note(
+      id: newId,
+      title: newNote.title,
+      content: newNote.content,
+      category: newNote.category,
+      createdAt: newNote.createdAt,
+      updatedAt: newNote.updatedAt,
+    );
+
+    notes.add(noteWithId);
+    await saveNotesToPrefs(notes);
+  }
+
+  Future<void> updateNoteInPrefs(Note updatedNote) async {
+    await _initPrefs();
+    List<Note> notes = await loadNotes();
+    int index = notes.indexWhere((note) => note.id == updatedNote.id);
+    if (index != -1) {
+      notes[index] = updatedNote;
+      await saveNotesToPrefs(notes);
+    }
+  }
+
+  Future<void> deleteNoteFromPrefs(int id) async {
+    await _initPrefs();
+    List<Note> notes = await loadNotes();
+    notes.removeWhere((note) => note.id == id);
+    await saveNotesToPrefs(notes);
+  }
+
+  Future<void> clearNotes() async {
+    await _initPrefs();
+    await _prefs!.remove('notes');
+  }
+
   Future<void> saveThemeMode(bool isDark) async {
     await _initPrefs();
     await _prefs!.setBool('isDarkMode', isDark);

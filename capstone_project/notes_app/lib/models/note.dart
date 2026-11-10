@@ -12,9 +12,27 @@ class Note {
     required this.content,
     required this.category,
     DateTime? createdAt,
-    DateTime?  updatedAt,
-  }) : createdAt = createdAt ?? DateTime.now(),
+    DateTime? updatedAt,
+  })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
+
+  Note copyWith({
+    int? id,
+    String? title,
+    String? content,
+    String? category,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return Note(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      category: category ?? this.category,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -26,11 +44,11 @@ class Note {
       };
 
   factory Note.fromJson(Map<String, dynamic> json) => Note(
-        id: json['id'] ?? '',
+        id: json['id'] is int ? json['id']: int.tryParse(json['id']?.toString() ?? '') ?? 0,
         title: json['title'] ?? '',
         content: json['content'] ?? '',
         category: json['category'] ?? '',
-        createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
-        updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),
+        createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']): DateTime.now(),
+        updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']): DateTime.now(),
       );
 }

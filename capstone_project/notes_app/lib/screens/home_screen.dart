@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:notes_app/screens/create_note.dart';
-import 'package:notes_app/models/model_class.dart';
+import 'package:notes_app/models/note.dart';
 import 'package:notes_app/screens/note_details.dart';
 import 'package:notes_app/screens/settings.dart';
+
 import 'dart:async';
+
 import 'package:notes_app/widgets/empty_state.dart';
 import 'package:notes_app/widgets/note_card.dart';
 import 'package:notes_app/widgets/quote_section.dart';
@@ -18,25 +20,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomeState extends State<HomePage> {
-  String _selectedCategory = 'All';
-  String _searchKeyword = '';
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
-      Provider.of<NotesProvider>(context, listen: false).LoadNotes();
-    });
-  }
-
-  void searchNote(String keyword) {
-    setState(() {
-      _searchKeyword = keyword;
-    });
-  }
-  void filterNotesByCategory(String category) {
-    setState(() {
-      _selectedCategory = category;
+      if (!mounted) return;
+      Provider.of<NotesProvider>(context, listen: false).loadNotes();
     });
   }
 
@@ -62,7 +53,6 @@ class _HomeState extends State<HomePage> {
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
-              Provider.of<NotesProvider>(context, listen: false).LoadNotes();
             },
           ),
         ],
@@ -74,7 +64,20 @@ class _HomeState extends State<HomePage> {
             padding: const EdgeInsets.fromLTRB(12, 20, 12, 0),
             child: TextField(
               onChanged: (value) {
-                searchNote(value);
+                setState(() {
+                  _searchQuery = value;
+                });
+                if (value.isEmpty) {
+                  Provider.of<NotesProvider>(
+                    context,
+                    listen: false,
+                  ).loadNotes();
+                } else {
+                  Provider.of<NotesProvider>(
+                    context,
+                    listen: false,
+                  ).searchNotes(value);
+                }
               },
               decoration: InputDecoration(
                 labelText: 'Search by Title',
@@ -88,7 +91,6 @@ class _HomeState extends State<HomePage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
             child: DropdownButtonFormField<String>(
-              value: _selectedCategory,
               items: const [
                 DropdownMenuItem(value: 'All', child: Text('All Categories')),
                 DropdownMenuItem(value: 'Work', child: Text('Work')),
@@ -96,7 +98,12 @@ class _HomeState extends State<HomePage> {
                 DropdownMenuItem(value: 'Study', child: Text('Study')),
               ],
               onChanged: (value) {
-                filterNotesByCategory(value ?? 'All');
+                if (value != null) {
+                  Provider.of<NotesProvider>(
+                    context,
+                    listen: false,
+                  ).filterNotesByCategory(value);
+                }
               },
               decoration: InputDecoration(
                 labelText: 'Filter by Category',
@@ -112,20 +119,19 @@ class _HomeState extends State<HomePage> {
           Expanded(
             child: Consumer<NotesProvider>(
               builder: (context, notesProvider, child) {
-                var noteList = notesProvider.notes;
-                if (_selectedCategory != 'All') {
-                  noteList = noteList.where((n) => n.category == _selectedCategory).toList();
-                }
-                if (_searchKeyword.isNotEmpty) {
-                  noteList = noteList.where((n) => n.title.toLowerCase().contains(_searchKeyword.toLowerCase())).toList();
-                }
-                return noteList.isEmpty ? const EmptyState() :
-                   RefreshIndicator(
+                List<Note> noteList = notesProvider.notes;
+                return noteList.isEmpty
+                    ? EmptyState(
+                        message: _searchQuery.isNotEmpty
+                            ? 'No results found'
+                            : 'No notes available. Please add a note.',
+                      )
+                    : RefreshIndicator(
                         onRefresh: () async {
                           await Provider.of<NotesProvider>(
                             context,
                             listen: false,
-                          ).LoadNotes();
+                          ).loadNotes();
                         },
                         child: ListView.builder(
                           itemCount: noteList.length,
@@ -141,10 +147,11 @@ class _HomeState extends State<HomePage> {
                                         NoteDetails(note: note, index: index),
                                   ),
                                 );
+                                if (!mounted) return;
                                 Provider.of<NotesProvider>(
                                   context,
                                   listen: false,
-                                ).LoadNotes();
+                                ).loadNotes();
                               },
                             );
                           },
@@ -158,17 +165,11 @@ class _HomeState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.amber[700],
         child: const Icon(Icons.add, color: Colors.white, size: 30),
-        onPressed: () async {
-          final newNote = await Navigator.push(
+        onPressed: () {
+          Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const CreateNote()),
           );
-          if (newNote != null && newNote is Note) {
-            await Provider.of<NotesProvider>(
-              context,
-              listen: false,
-            ).addNote(newNote);
-          }
         },
       ),
     );

@@ -3,6 +3,7 @@ import 'package:notes_app/models/quote_model.dart';
 import 'package:notes_app/providers/quote_provider.dart';
 import 'package:notes_app/widgets/quote_card.dart';
 import 'package:provider/provider.dart';
+
 class QuoteSection extends StatefulWidget {
   const QuoteSection({super.key});
 
@@ -14,12 +15,13 @@ class _QuoteSectionState extends State<QuoteSection> {
   @override
   void initState() {
     super.initState();
-    // _quoteFuture = ApiService().fetchRandomQuote();
     Provider.of<QuoteProvider>(context, listen: false).fetchQuote();
   }
+
   void _refresh() {
     Provider.of<QuoteProvider>(context, listen: false).fetchQuote();
   }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<QuoteProvider>(
@@ -27,7 +29,15 @@ class _QuoteSectionState extends State<QuoteSection> {
         if (quoteProvider.isLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (quoteProvider.errorMsg.isNotEmpty) {
-          return Center(child: Text(quoteProvider.errorMsg));
+          return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+          Text(quoteProvider.errorMsg),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _refresh,
+          ),
+          ],);
         } else {
           return QuoteCard(
             quoteObj: Quote(

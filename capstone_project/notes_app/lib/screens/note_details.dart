@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:notes_app/providers/notes_provider.dart';
 import 'package:notes_app/screens/create_note.dart';
-import 'package:notes_app/models/model_class.dart';
-import 'package:notes_app/widgets/format_date.dart';
+import 'package:notes_app/models/note.dart';
+import 'package:notes_app/utils/format_date.dart';
 import 'package:provider/provider.dart';
 
 class NoteDetails extends StatefulWidget {
@@ -22,7 +22,7 @@ class _NoteDetailsState extends State<NoteDetails> {
     super.initState();
     currentNote = widget.note;
     Future.microtask(() {
-      Provider.of<NotesProvider>(context, listen: false).LoadNotes();
+      Provider.of<NotesProvider>(context, listen: false).loadNotes();
     });
   }
 
