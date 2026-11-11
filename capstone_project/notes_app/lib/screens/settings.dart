@@ -3,30 +3,17 @@ import 'package:notes_app/providers/theme_provider.dart';
 import 'package:notes_app/widgets/delete_dialog.dart';
 import 'package:provider/provider.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends State<SettingsScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() {
-      Provider.of<ThemeProvider>(context, listen: false).loadThemeMode();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final errorColor = Theme.of(context).colorScheme.error;
     return Scaffold(
       appBar: AppBar(title: const Text('Settings'), centerTitle: true),
       body: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           bool isDarkMode = themeProvider.themeMode == ThemeMode.dark;
-
           return ListView(
             children: [
               const SizedBox(height: 10),
@@ -35,7 +22,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: const Text('Dark Mode'),
                 subtitle: const Text('Switch between Light and Dark theme'),
                 value: isDarkMode,
-                activeColor: Colors.amber,
                 onChanged: (bool value) async {
                   await themeProvider.toggleTheme(value);
                 },
@@ -43,11 +29,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               const Divider(),
               ListTile(
-                leading: const Icon(Icons.delete_sweep, color: Colors.red),
-                title: const Text(
+                leading: Icon(Icons.delete_sweep, color: errorColor),
+                title: Text(
                   'Delete All Notes',
                   style: TextStyle(
-                    color: Colors.red,
+                    color: errorColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

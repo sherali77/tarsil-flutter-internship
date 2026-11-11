@@ -4,6 +4,10 @@ import 'package:provider/provider.dart';
 
 class DeleteDialog {
   void showDeleteConfirmationDialog(BuildContext context) {
+    final provider = context.read<NotesProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final errorColor = Theme.of(context).colorScheme.error;
+
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -17,22 +21,23 @@ class DeleteDialog {
             ),
             TextButton(
               onPressed: () async {
-                await Provider.of<NotesProvider>(context, listen: false).deleteAllNotes();
-                
-                if (context.mounted) {
-                  Navigator.pop(dialogContext);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('All notes deleted'),
-                      backgroundColor: Colors.red,
+                Navigator.pop(dialogContext);
+                final success = await provider.deleteAllNotes();
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? 'All notes deleted'
+                          : (provider.errorMessage ?? 'Could not delete notes'),
                     ),
-                  );
-                }
+                    backgroundColor: errorColor,
+                  ),
+                );
               },
-              child: const Text(
+              child: Text(
                 'Delete All',
                 style: TextStyle(
-                  color: Colors.red,
+                  color: errorColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),

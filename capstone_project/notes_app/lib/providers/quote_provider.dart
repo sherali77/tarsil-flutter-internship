@@ -8,11 +8,12 @@ class QuoteProvider extends ChangeNotifier {
   bool _isLoading = false;
   String _errorMsg = '';
   Quote? _quoteData;
+  Quote? get quoteData => _quoteData;
   String get quote => _quoteData?.quote ?? '';
   String get author => _quoteData?.author ?? '';
   String get errorMsg => _errorMsg;
   bool get isLoading => _isLoading;
-  
+
   Future<void> fetchQuote() async {
     if (_isLoading) return;
     _isLoading = true;

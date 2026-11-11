@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:notes_app/models/note.dart';
 import 'package:notes_app/providers/notes_provider.dart';
+import 'package:notes_app/utils/search.dart';
 import 'package:notes_app/utils/validator.dart';
 import 'package:provider/provider.dart';
 
 class CreateNote extends StatefulWidget {
   final Note? noteToEdit;
-  final int? noteIndex;
 
-  const CreateNote({super.key, this.noteToEdit, this.noteIndex});
+  const CreateNote({super.key, this.noteToEdit});
 
   @override
   State<CreateNote> createState() => _CreateNoteState();
@@ -19,9 +19,7 @@ class _CreateNoteState extends State<CreateNote> {
 
   late TextEditingController _titleController;
   late TextEditingController _contentController;
-  String _selectedCategory = 'Work';
-
-  final List<String> _categories = ['Work', 'Personal', 'Study'];
+  String _selectedCategory = kCategories.first;
 
   @override
   void initState() {
@@ -45,11 +43,51 @@ class _CreateNoteState extends State<CreateNote> {
     super.dispose();
   }
 
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final provider = context.read<NotesProvider>();
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    final title = _titleController.text.trim();
+    final content = _contentController.text.trim();
+    final editing = widget.noteToEdit;
+
+    bool success;
+    if (editing == null) {
+      final note = Note(
+        id: 0,
+        title: title,
+        content: content,
+        category: _selectedCategory,
+      );
+      success = await provider.addNote(note);
+    } else {
+      final updated = editing.copyWith(
+        title: title,
+        content: content,
+        category: _selectedCategory,
+        updatedAt: DateTime.now(),
+      );
+      success = await provider.updateNote(updated);
+    }
+
+    if (!mounted) return;
+    if (success) {
+      navigator.pop();
+    } else {
+      messenger.showSnackBar(
+        SnackBar(content: Text(provider.errorMessage ?? 'Could not save note')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.amber[700],
         title: Text(
           widget.noteToEdit == null ? 'Create Note' : 'Edit Note',
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -97,7 +135,7 @@ class _CreateNoteState extends State<CreateNote> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                items: _categories.map((String category) {
+                items: kCategories.map((String category) {
                   return DropdownMenuItem<String>(
                     value: category,
                     child: Text(category),
@@ -112,32 +150,14 @@ class _CreateNoteState extends State<CreateNote> {
               const SizedBox(height: 24),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber[700],
                   padding: const EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
                 ),
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    final title = _titleController.text.trim();
-                    final content = _contentController.text.trim();
-
-                    final note = Note(
-                      title: title,
-                      content: content,
-                      category: _selectedCategory,
-                      createdAt: widget.noteToEdit != null
-                          ? widget.noteToEdit!.createdAt
-                          : DateTime.now(),
-                      updatedAt: DateTime.now(),
-                      id: widget.noteToEdit != null ? widget.noteToEdit!.id : 0,
-                    );
-                    Provider.of<NotesProvider>(context, listen: false).addNote(note);
-                    Navigator.pop(context, note);
-                  }
-                },
+                onPressed: _save,
                 child: Text(
                   widget.noteToEdit == null ? 'Save Note' : 'Update Note',
                   style: const TextStyle(
-                    color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),

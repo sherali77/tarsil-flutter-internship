@@ -3,9 +3,7 @@ import 'package:notes_app/screens/create_note.dart';
 import 'package:notes_app/models/note.dart';
 import 'package:notes_app/screens/note_details.dart';
 import 'package:notes_app/screens/settings.dart';
-
-import 'dart:async';
-
+import 'package:notes_app/utils/search.dart';
 import 'package:notes_app/widgets/empty_state.dart';
 import 'package:notes_app/widgets/note_card.dart';
 import 'package:notes_app/widgets/quote_section.dart';
@@ -20,36 +18,37 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomeState extends State<HomePage> {
-  String _searchQuery = '';
-
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
       if (!mounted) return;
-      Provider.of<NotesProvider>(context, listen: false).loadNotes();
+      context.read<NotesProvider>().loadNotes();
     });
+  }
+
+  String _emptyMessage(NotesProvider provider) {
+    if (provider.searchQuery.isNotEmpty) return 'No results found';
+    if (provider.selectedCategory != 'All') {
+      return 'No notes in this category';
+    }
+    return 'No notes yet. Please add a note.';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.amber[700],
         title: const Text(
           'Notes App',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white),
-            onPressed: () async {
-              await Navigator.push(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
@@ -64,20 +63,7 @@ class _HomeState extends State<HomePage> {
             padding: const EdgeInsets.fromLTRB(12, 20, 12, 0),
             child: TextField(
               onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-                if (value.isEmpty) {
-                  Provider.of<NotesProvider>(
-                    context,
-                    listen: false,
-                  ).loadNotes();
-                } else {
-                  Provider.of<NotesProvider>(
-                    context,
-                    listen: false,
-                  ).searchNotes(value);
-                }
+                context.read<NotesProvider>().searchNotes(value);
               },
               decoration: InputDecoration(
                 labelText: 'Search by Title',
@@ -91,18 +77,21 @@ class _HomeState extends State<HomePage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
             child: DropdownButtonFormField<String>(
-              items: const [
-                DropdownMenuItem(value: 'All', child: Text('All Categories')),
-                DropdownMenuItem(value: 'Work', child: Text('Work')),
-                DropdownMenuItem(value: 'Personal', child: Text('Personal')),
-                DropdownMenuItem(value: 'Study', child: Text('Study')),
+              items: [
+                const DropdownMenuItem(
+                  value: 'All',
+                  child: Text('All Categories'),
+                ),
+                ...kCategories.map(
+                  (category) => DropdownMenuItem(
+                    value: category,
+                    child: Text(category),
+                  ),
+                ),
               ],
               onChanged: (value) {
                 if (value != null) {
-                  Provider.of<NotesProvider>(
-                    context,
-                    listen: false,
-                  ).filterNotesByCategory(value);
+                  context.read<NotesProvider>().filterNotesByCategory(value);
                 }
               },
               decoration: InputDecoration(
@@ -120,51 +109,64 @@ class _HomeState extends State<HomePage> {
             child: Consumer<NotesProvider>(
               builder: (context, notesProvider, child) {
                 List<Note> noteList = notesProvider.notes;
-                return noteList.isEmpty
-                    ? EmptyState(
-                        message: _searchQuery.isNotEmpty
-                            ? 'No results found'
-                            : 'No notes available. Please add a note.',
-                      )
-                    : RefreshIndicator(
-                        onRefresh: () async {
-                          await Provider.of<NotesProvider>(
-                            context,
-                            listen: false,
-                          ).loadNotes();
-                        },
-                        child: ListView.builder(
-                          itemCount: noteList.length,
-                          itemBuilder: (context, index) {
-                            final note = noteList[index];
-                            return NoteCard(
-                              note: note,
-                              onTap: () async {
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        NoteDetails(note: note, index: index),
-                                  ),
-                                );
-                                if (!mounted) return;
-                                Provider.of<NotesProvider>(
-                                  context,
-                                  listen: false,
-                                ).loadNotes();
-                              },
-                            );
-                          },
+
+                if (notesProvider.isLoading && noteList.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (notesProvider.errorMessage != null && noteList.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          notesProvider.errorMessage!,
+                          textAlign: TextAlign.center,
                         ),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          onPressed: () => notesProvider.loadNotes(),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                if (noteList.isEmpty) {
+                  return EmptyState(message: _emptyMessage(notesProvider));
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    await context.read<NotesProvider>().loadNotes();
+                  },
+                  child: ListView.builder(
+                    itemCount: noteList.length,
+                    itemBuilder: (context, index) {
+                      final note = noteList[index];
+                      return NoteCard(
+                        note: note,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => NoteDetails(note: note),
+                            ),
+                          );
+                        },
                       );
+                    },
+                  ),
+                );
               },
             ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.amber[700],
-        child: const Icon(Icons.add, color: Colors.white, size: 30),
+        child: const Icon(Icons.add, size: 30),
         onPressed: () {
           Navigator.push(
             context,

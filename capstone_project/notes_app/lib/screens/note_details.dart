@@ -3,31 +3,16 @@ import 'package:notes_app/providers/notes_provider.dart';
 import 'package:notes_app/screens/create_note.dart';
 import 'package:notes_app/models/note.dart';
 import 'package:notes_app/utils/format_date.dart';
+import 'package:notes_app/widgets/delete_one.dart';
 import 'package:provider/provider.dart';
 
-class NoteDetails extends StatefulWidget {
+class NoteDetails extends StatelessWidget {
   final Note note;
-  final int index;
-  const NoteDetails({super.key, required this.index, required this.note});
-
-  @override
-  State<NoteDetails> createState() => _NoteDetailsState();
-}
-
-class _NoteDetailsState extends State<NoteDetails> {
-  late Note currentNote;
-
-  @override
-  void initState() {
-    super.initState();
-    currentNote = widget.note;
-    Future.microtask(() {
-      Provider.of<NotesProvider>(context, listen: false).loadNotes();
-    });
-  }
+  const NoteDetails({super.key, required this.note});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -40,6 +25,7 @@ class _NoteDetailsState extends State<NoteDetails> {
         padding: const EdgeInsets.all(16.0),
         child: Consumer<NotesProvider>(
           builder: (context, notesProvider, child) {
+            final currentNote = notesProvider.getNoteById(note.id) ?? note;
             return Card(
               elevation: 3,
               shape: RoundedRectangleBorder(
@@ -79,14 +65,14 @@ class _NoteDetailsState extends State<NoteDetails> {
                     const SizedBox(height: 10),
                     Text(
                       "Created: ${FormatDate.format(currentNote.createdAt)}",
-                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                      style: TextStyle(color: theme.hintColor, fontSize: 12),
                     ),
                     if (currentNote.updatedAt.isAfter(
                       currentNote.createdAt.add(const Duration(seconds: 5)),
                     ))
                       Text(
                         "Updated: ${FormatDate.format(currentNote.updatedAt)}",
-                        style: const TextStyle(color: Colors.grey, fontSize: 12),
+                        style: TextStyle(color: theme.hintColor, fontSize: 12),
                       ),
 
                     const Divider(height: 30),
@@ -110,47 +96,34 @@ class _NoteDetailsState extends State<NoteDetails> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.edit,
-                            color: Colors.green,
+                            color: theme.colorScheme.primary,
                             size: 24,
                           ),
-                          onPressed: () async {
-                            final updatedNote = await Navigator.push(
+                          onPressed: () {
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) {
-                                  return CreateNote(
-                                    noteToEdit: currentNote,
-                                    noteIndex: widget.index,
-                                  );
+                                  return CreateNote(noteToEdit: currentNote);
                                 },
                               ),
                             );
-                            if (updatedNote != null && updatedNote is Note) {
-                              setState(() {
-                                currentNote = updatedNote;
-                              });
-                              await Provider.of<NotesProvider>(
-                                context,
-                                listen: false,
-                              ).updateNote(updatedNote);
-                            }
                           },
                         ),
                         const SizedBox(width: 12),
                         IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.delete,
-                            color: Colors.red,
+                            color: theme.colorScheme.error,
                             size: 24,
                           ),
-                          onPressed: () async {
-                            await Provider.of<NotesProvider>(
+                          onPressed: () {
+                            DeleteOneDialog().showDeleteConfirmation(
                               context,
-                              listen: false,
-                            ).deleteNote(currentNote.id);
-                            Navigator.pop(context);
+                              currentNote.id,
+                            );
                           },
                         ),
                       ],

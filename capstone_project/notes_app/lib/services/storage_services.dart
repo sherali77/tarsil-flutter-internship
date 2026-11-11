@@ -43,14 +43,7 @@ class StorageService {
       newId = maxId + 1;
     }
 
-    final noteWithId = Note(
-      id: newId,
-      title: newNote.title,
-      content: newNote.content,
-      category: newNote.category,
-      createdAt: newNote.createdAt,
-      updatedAt: newNote.updatedAt,
-    );
+    final noteWithId = newNote.copyWith(id: newId);
 
     notes.add(noteWithId);
     await saveNotesToPrefs(notes);
@@ -60,10 +53,11 @@ class StorageService {
     await _initPrefs();
     List<Note> notes = await loadNotes();
     int index = notes.indexWhere((note) => note.id == updatedNote.id);
-    if (index != -1) {
-      notes[index] = updatedNote;
-      await saveNotesToPrefs(notes);
+    if (index == -1) {
+      throw Exception('Note not found, could not update');
     }
+    notes[index] = updatedNote;
+    await saveNotesToPrefs(notes);
   }
 
   Future<void> deleteNoteFromPrefs(int id) async {
