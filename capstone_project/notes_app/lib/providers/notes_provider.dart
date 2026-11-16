@@ -19,7 +19,7 @@ class NotesProvider extends ChangeNotifier {
   String get searchQuery => _searchQuery;
   String get selectedCategory => _selectedCategory;
 
-  Note? getNoteById(int id) {
+  Note? getNoteById(int? id) {
     for (final note in _allNotes) {
       if (note.id == id) return note;
     }
@@ -48,7 +48,7 @@ class NotesProvider extends ChangeNotifier {
     bool success = true;
     try {
       if (action != null) await action();
-      _allNotes = await notesRepo.getNotes();
+      _allNotes = await notesRepo.getAllNotes();
       _applyFilters();
       _errorMessage = null;
     } catch (e) {
@@ -80,14 +80,14 @@ class NotesProvider extends ChangeNotifier {
   }
 
   Future<bool> updateNote(Note updatedNote) {
-    return _run(() => notesRepo.updateNote(updatedNote));
+    return _run(() => notesRepo.editNote(updatedNote));
   }
 
-  Future<bool> deleteNote(int id) {
+  Future<bool> deleteNote(int? id) {
     return _run(() => notesRepo.deleteNote(id));
   }
 
   Future<bool> deleteAllNotes() {
-    return _run(() => notesRepo.deleteAllNotes());
+    return _run(() => notesRepo.deleteAll());
   }
 }

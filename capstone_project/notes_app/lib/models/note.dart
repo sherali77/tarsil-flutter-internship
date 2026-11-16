@@ -1,5 +1,5 @@
 class Note {
-  final int id;
+  final int? id;
   final String title;
   final String content;
   final String category;
@@ -34,7 +34,7 @@ class Note {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toMap() => {
         'id': id,
         'title': title,
         'content': content,
@@ -43,12 +43,12 @@ class Note {
         'updatedAt': updatedAt.toIso8601String(),
       };
 
-  factory Note.fromJson(Map<String, dynamic> json) => Note(
-        id: json['id'] is int ? json['id']: int.tryParse(json['id']?.toString() ?? '') ?? 0,
-        title: json['title'] ?? '',
-        content: json['content'] ?? '',
-        category: json['category'] ?? '',
-        createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']): DateTime.now(),
-        updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']): DateTime.now(),
+  factory Note.fromMap(Map<String, dynamic> map) => Note(
+        id: map['id'],
+        title: map['title'],
+        content: map['content'],
+        category: map['category'],
+        createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt']): DateTime.now(),
+        updatedAt: map['updatedAt'] != null ? DateTime.parse(map['updatedAt']): DateTime.now(),
       );
 }

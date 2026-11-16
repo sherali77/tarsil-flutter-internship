@@ -57,7 +57,7 @@ class _CreateNoteState extends State<CreateNote> {
     bool success;
     if (editing == null) {
       final note = Note(
-        id: 0,
+        id: null,
         title: title,
         content: content,
         category: _selectedCategory,

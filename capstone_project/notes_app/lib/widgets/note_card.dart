@@ -15,7 +15,7 @@ class NoteCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: ListTile(
         title: Hero(
-          tag: 'note-title-${note.id}',
+          tag: 'note-title',
           child: Material(
             color: Colors.transparent,
             child: Text(
@@ -25,7 +25,7 @@ class NoteCard extends StatelessWidget {
           ),
         ),
         subtitle: Hero(
-    tag: 'note-content-${note.id}',
+    tag: 'note-content',
     child: Material(
       color: Colors.transparent,
       child: Text(
@@ -35,14 +35,6 @@ class NoteCard extends StatelessWidget {
       ),
     ),
   ),
-        leading: CircleAvatar(
-          child: Text(
-            '${note.id}',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
         trailing: Chip(
           label: Text(note.category, style: const TextStyle(fontSize: 11)),
         ),

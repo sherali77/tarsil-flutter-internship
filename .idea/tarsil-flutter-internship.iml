@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/Day5_APIs_JSON_Local_Storage/day5_posts_app/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/Day5_APIs_JSON_Local_Storage/day5_posts_app/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/Day5_APIs_JSON_Local_Storage/day5_posts_app/build" />
+      <excludeFolder url="file://$MODULE_DIR$/capstone_project/notes_app/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/capstone_project/notes_app/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/capstone_project/notes_app/build" />
+      <excludeFolder url="file://$MODULE_DIR$/day2_hello_tarsil/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/day2_hello_tarsil/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/day2_hello_tarsil/build" />
+      <excludeFolder url="file://$MODULE_DIR$/day3_widgets/contact_list/contact_app/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/day3_widgets/contact_list/contact_app/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/day3_widgets/contact_list/contact_app/build" />
+      <excludeFolder url="file://$MODULE_DIR$/day3_widgets/grid_layout/g_view/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/day3_widgets/grid_layout/g_view/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/day3_widgets/grid_layout/g_view/build" />
+      <excludeFolder url="file://$MODULE_DIR$/day3_widgets/profile_app/p_app/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/day3_widgets/profile_app/p_app/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/day3_widgets/profile_app/p_app/build" />
+      <excludeFolder url="file://$MODULE_DIR$/day4_State_User_Input_Navigation/to-do_list/to_do_app/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/day4_State_User_Input_Navigation/to-do_list/to_do_app/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/day4_State_User_Input_Navigation/to-do_list/to_do_app/build" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

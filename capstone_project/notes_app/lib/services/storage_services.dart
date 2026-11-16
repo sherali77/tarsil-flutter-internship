@@ -19,7 +19,7 @@ class StorageService {
   Future<void> saveNotesToPrefs(List<Note> notes) async {
     await _initPrefs();
     List<String> noteStringList = notes
-        .map((note) => jsonEncode(note.toJson()))
+        .map((note) => jsonEncode(note.toMap()))
         .toList();
     await _prefs!.setStringList('notes', noteStringList);
   }
@@ -29,23 +29,14 @@ class StorageService {
     List<String>? noteStringList = _prefs!.getStringList('notes');
     if (noteStringList == null) return [];
     return noteStringList
-        .map((noteString) => Note.fromJson(jsonDecode(noteString)))
+        .map((noteString) => Note.fromMap(jsonDecode(noteString)))
         .toList();
   }
 
   Future<void> insertNote(Note newNote) async {
     await _initPrefs();
     List<Note> notes = await loadNotes();
-
-    int newId = 1;
-    if (notes.isNotEmpty) {
-      int maxId = notes.map((n) => n.id).reduce((a, b) => a > b ? a : b);
-      newId = maxId + 1;
-    }
-
-    final noteWithId = newNote.copyWith(id: newId);
-
-    notes.add(noteWithId);
+    notes.add(newNote);
     await saveNotesToPrefs(notes);
   }
 

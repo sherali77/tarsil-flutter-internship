@@ -3,7 +3,7 @@ import 'package:notes_app/providers/notes_provider.dart';
 import 'package:provider/provider.dart';
 
 class DeleteOneDialog {
-  void showDeleteConfirmation(BuildContext context, int noteId) {
+  void showDeleteConfirmation(BuildContext context, int? noteId) {
     final provider = context.read<NotesProvider>();
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
