@@ -7,8 +7,11 @@ class QuoteProvider extends ChangeNotifier {
   QuoteProvider({required this.quoteRepo});
   bool _isLoading = false;
   String _errorMsg = '';
+  String latestQuote = '';
   Quote? _quoteData;
-  Quote? get quoteData => _quoteData;
+  Quote? currquote;
+  Quote? get quotedata => _quoteData;
+  Quote? get currQuote => currquote;
   String get quote => _quoteData?.quote ?? '';
   String get author => _quoteData?.author ?? '';
   String get errorMsg => _errorMsg;
@@ -22,7 +25,8 @@ class QuoteProvider extends ChangeNotifier {
     try {
       Quote quoteData = await quoteRepo.fetchQuote();
       _quoteData = quoteData;
-      _errorMsg = '';
+      currquote = quoteData;
+      latestQuote = quoteData.quote;
     } catch (e) {
       _errorMsg = e.toString();
     } finally {

@@ -28,16 +28,27 @@ class _QuoteSectionState extends State<QuoteSection> {
   Widget build(BuildContext context) {
     return Consumer<QuoteProvider>(
       builder: (context, quoteProvider, child) {
-        final quoteData = quoteProvider.quoteData;
+        final quoteData = quoteProvider.quotedata;
+        final currQuote=quoteProvider.currquote;
+        final snackBar = SnackBar(content: Text(quoteProvider.errorMsg));
         if (quoteProvider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              QuoteCard(quoteObj: currQuote, onRefresh: _refresh),
+              CircularProgressIndicator(),
+            ],
+          );
         } else if (quoteProvider.errorMsg.isNotEmpty) {
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Flexible(child: Text(quoteProvider.errorMsg)),
+              Flexible(child: Text(quoteProvider.latestQuote)),
               TextButton.icon(
-                onPressed: _refresh,
+                onPressed: () {
+                  _refresh();
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                },
                 icon: const Icon(Icons.refresh),
                 label: const Text('Retry'),
               ),

@@ -54,8 +54,9 @@ class NotesProvider extends ChangeNotifier {
     } catch (e) {
       _errorMessage = e.toString();
       success = false;
+    } finally {
+      _setLoading(false);
     }
-    _setLoading(false);
     return success;
   }
 
