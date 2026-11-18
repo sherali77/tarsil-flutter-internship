@@ -4,7 +4,6 @@ import 'package:notes_app/models/note.dart';
 class NoteCard extends StatelessWidget {
   final Note note;
   final VoidCallback onTap;
-
   const NoteCard({super.key, required this.note, required this.onTap});
 
   @override
@@ -25,16 +24,16 @@ class NoteCard extends StatelessWidget {
           ),
         ),
         subtitle: Hero(
-    tag: 'note-content',
-    child: Material(
-      color: Colors.transparent,
-      child: Text(
-        note.content,
-        style: const TextStyle(fontSize: 17,),
-        maxLines: 2,
-      ),
-    ),
-  ),
+          tag: 'note-content',
+          child: Material(
+            color: Colors.transparent,
+            child: Text(
+              note.content,
+              style: const TextStyle(fontSize: 17),
+              maxLines: 2,
+            ),
+          ),
+        ),
         trailing: Chip(
           label: Text(note.category, style: const TextStyle(fontSize: 11)),
         ),

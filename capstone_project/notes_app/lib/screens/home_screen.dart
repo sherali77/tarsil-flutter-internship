@@ -6,6 +6,7 @@ import 'package:notes_app/screens/settings.dart';
 import 'package:notes_app/utils/search.dart';
 import 'package:notes_app/widgets/empty_state.dart';
 import 'package:notes_app/widgets/note_card.dart';
+import 'package:notes_app/widgets/popUp_menu.dart';
 import 'package:notes_app/widgets/quote_section.dart';
 import 'package:notes_app/providers/notes_provider.dart';
 import 'package:provider/provider.dart';
@@ -54,6 +55,14 @@ class _HomeState extends State<HomePage> {
               );
             },
           ),
+          SimplePopupMenu(
+            item1: 'Oldest',
+            item2: 'Newest',
+            onItem1Tap: () {
+            },
+            onItem2Tap: () {
+            },
+          ),
         ],
       ),
       body: Column(
@@ -83,10 +92,8 @@ class _HomeState extends State<HomePage> {
                   child: Text('All Categories'),
                 ),
                 ...kCategories.map(
-                  (category) => DropdownMenuItem(
-                    value: category,
-                    child: Text(category),
-                  ),
+                  (category) =>
+                      DropdownMenuItem(value: category, child: Text(category)),
                 ),
               ],
               onChanged: (value) {

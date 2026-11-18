@@ -126,6 +126,20 @@ class NoteDetails extends StatelessWidget {
                             );
                           },
                         ),
+                        IconButton(
+                          icon: Icon(
+                            currentNote.isPinned == true
+                                ? Icons.push_pin
+                                : Icons.push_pin_outlined,
+                            color: Colors.blue,
+                          ),
+                          onPressed: () {
+                            notesProvider.togglePin(
+                              currentNote.id!,
+                              !(currentNote.isPinned ?? false),
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ],

@@ -1,64 +1,71 @@
 import "package:notes_app/models/note.dart";
 import 'package:notes_app/db/notes_db.dart';
-import "package:sqflite/sql.dart";
+import "package:sqflite/sqflite.dart";
 
 class NotesRepo {
   Future<List<Note>> getAllNotes() async {
-    try {
-      final db = await DatabaseService.instance.database;
-      final List<Map<String, dynamic>> maps = await db.query(
-        DatabaseService.TABLE_NAME,
-      );
-      return maps.map((e) => Note.fromMap(e)).toList();
-    } catch (e) {
-      throw Exception("Failed to load notes $e");
-    }
+  try {
+    return await DatabaseService.instance.getAllNotes();
+  } on DatabaseException catch (e, stackTrace) {
+    Error.throwWithStackTrace(
+      Exception('Failed to get notes'),
+      stackTrace,
+    );
   }
+}
 
   Future<void> addNote(Note note) async {
-    try {
-      final db = await DatabaseService.instance.database;
-      await db.insert(
-        DatabaseService.TABLE_NAME,
-        note.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
+    try{
+    await DatabaseService.instance.addNote(note);
+    }on DatabaseException catch (e, stackTrace) {
+      Error.throwWithStackTrace(
+        Exception('Database failed to add note'),
+        stackTrace,
       );
-    } catch (e) {
-      throw Exception("Failed to insert note $e");
-    }
-  }
-  Future<void> editNote(Note note) async {
-    try {
-      final db = await DatabaseService.instance.database;
-      await db.update(
-        DatabaseService.TABLE_NAME,
-        note.toMap(),
-        where: "id=?",
-        whereArgs: [note.id],
-      );
-    } catch (e) {
-      throw Exception("Failed to update note $e");
     }
   }
 
-  Future<void> deleteNote(int? id) async {
-    try {
-      final db = await DatabaseService.instance.database;
-      await db.delete(
-        DatabaseService.TABLE_NAME,
-        where: "id=?",
-        whereArgs: [id],
+   Future<void> editNote(Note note) async {
+    try{
+    await DatabaseService.instance.editNote(note);
+    }on DatabaseException catch (e, stackTrace) {
+      Error.throwWithStackTrace(
+        Exception('Database failed to update note'),
+        stackTrace,
       );
-    } catch (e) {
-      throw Exception("Failed to delete note $e");
     }
   }
-  Future<void> deleteAll() async {
-    try {
-      final db = await DatabaseService.instance.database;
-      await db.delete(DatabaseService.TABLE_NAME);
-    } catch (e) {
-      throw Exception("Failed to delete all notes $e");
+
+   Future<void> deleteNote(int? id) async {
+    try{
+    await DatabaseService.instance.deleteNote(id);
+    }on DatabaseException catch (e, stackTrace) {
+      Error.throwWithStackTrace(
+        Exception('Database failed to delete note'),
+        stackTrace,
+      );
+    }
+  }
+
+   Future<void> deleteAll() async {
+    try{
+    await DatabaseService.instance.deleteAll();
+    }on DatabaseException catch (e, stackTrace) {
+      Error.throwWithStackTrace(
+        Exception('Database failed to deleteAll notes'),
+        stackTrace,
+      );
+    }
+  }
+
+  Future<void> togglePin(int id, bool isPinned) async {
+    try{
+    await DatabaseService.instance.togglePin(id, isPinned);
+    }on DatabaseException catch (e, stackTrace) {
+      Error.throwWithStackTrace(
+        Exception('Database failed to pin a note'),
+        stackTrace,
+      );
     }
   }
 }

@@ -31,16 +31,26 @@ class NotesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _applyFilters() {
-    final keyword = _searchQuery.toLowerCase();
-    _notes = _allNotes.where((note) {
-      final matchesSearch =
-          keyword.isEmpty || note.title.toLowerCase().contains(keyword);
-      final matchesCategory =
-          _selectedCategory == 'All' || note.category == _selectedCategory;
-      return matchesSearch && matchesCategory;
-    }).toList();
-  }
+ void _applyFilters() {
+  final keyword = _searchQuery.toLowerCase();
+
+  _notes = _allNotes.where((note) {
+    final matchesSearch =
+        keyword.isEmpty || note.title.toLowerCase().contains(keyword);
+
+    final matchesCategory =
+        _selectedCategory == 'All' ||
+        note.category == _selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  }).toList();
+
+  _notes.sort((note1, note2) {
+  if (note1.isPinned == true) return -1;
+  if (note2.isPinned == true) return 1;
+  return 0;
+});
+}
 
   Future<bool> _run([Future<void> Function()? action]) async {
     if (_isLoading) return false;
@@ -90,5 +100,9 @@ class NotesProvider extends ChangeNotifier {
 
   Future<bool> deleteAllNotes() {
     return _run(() => notesRepo.deleteAll());
+  }
+
+  Future<bool> togglePin(int id ,bool isPinned) {
+    return _run(() => notesRepo.togglePin(id, isPinned));
   }
 }
