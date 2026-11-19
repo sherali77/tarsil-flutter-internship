@@ -62,6 +62,7 @@ class _CreateNoteState extends State<CreateNote> {
         content: content,
         category: _selectedCategory, 
         isPinned: null, 
+        isArchived: null, 
       );
       success = await provider.addNote(note);
     } else {

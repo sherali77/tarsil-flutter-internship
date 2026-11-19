@@ -13,6 +13,7 @@ class DatabaseService {
   static final CONTENT_COLUMN = 'content';
   static final CATEGORY_COLUMN = 'category';
   static final ISPINNED_COLUMN = 'isPinned';
+  static final ISARCHIVED_COLUMN = 'isArchived';
   static final UPDATEDat_COLUMN = 'updatedAt';
   static final CREATEDat_COLUMN = 'createdAt';
 
@@ -38,16 +39,18 @@ class DatabaseService {
         $CATEGORY_COLUMN TEXT NOT NULL,
         $CREATEDat_COLUMN TEXT NOT NULL,
         $UPDATEDat_COLUMN TEXT NOT NULL,
-        $ISPINNED_COLUMN INTEGER DEFAULT 0
+        $ISPINNED_COLUMN INTEGER DEFAULT 0,
+        $ISARCHIVED_COLUMN INTEGER DEFAULT 0
       )
     ''');
   }
 
-  Future<List<Note>> getAllNotes() async {
+  Future<List<Note>> getAllNotes({String? orderBy}) async {
     try {
       final db = await DatabaseService.instance.database;
       final List<Map<String, dynamic>> maps = await db.query(
         DatabaseService.TABLE_NAME,
+        orderBy: orderBy,
       );
       return maps.map((e) => Note.fromMap(e)).toList();
     } on DatabaseException catch (e, stackTrace) {
@@ -134,7 +137,25 @@ class DatabaseService {
         Exception('Databse pin note failed'),
         stackTrace,
       );
-    }
+    } 
+  }
+
+   Future<void> archiveNote(int id, bool isArchived) async {
+    try {
+      final db = await DatabaseService.instance.database;
+
+      await db.update(
+        DatabaseService.TABLE_NAME,
+        {'isArchived': isArchived ? 1 : 0},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    } on DatabaseException catch (e, stackTrace) {
+      Error.throwWithStackTrace(
+        Exception('Databse pin note failed'),
+        stackTrace,
+      );
+    } 
   }
 
   Future<void> close() async {

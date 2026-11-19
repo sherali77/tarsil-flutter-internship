@@ -4,24 +4,28 @@ import 'package:notes_app/repositories/notes_repo.dart';
 
 class NotesProvider extends ChangeNotifier {
   final NotesRepo notesRepo;
-  NotesProvider({required this.notesRepo});
 
+  NotesProvider({required this.notesRepo});
   bool _isLoading = false;
   List<Note> _allNotes = [];
   List<Note> _notes = [];
   String? _errorMessage;
   String _searchQuery = '';
   String _selectedCategory = 'All';
-
+  String _orderBy = 'isPinned DESC, createdAt DESC';
+  bool _showArchived = false;
   bool get isLoading => _isLoading;
   List<Note> get notes => List.unmodifiable(_notes);
   String? get errorMessage => _errorMessage;
   String get searchQuery => _searchQuery;
   String get selectedCategory => _selectedCategory;
+  bool get showArchived => _showArchived;
 
   Note? getNoteById(int? id) {
     for (final note in _allNotes) {
-      if (note.id == id) return note;
+      if (note.id == id) {
+        return note;
+      }
     }
     return null;
   }
@@ -31,47 +35,143 @@ class NotesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
- void _applyFilters() {
-  final keyword = _searchQuery.toLowerCase();
+  Future<void> _refreshNotes() async {
+    _allNotes = await notesRepo.getAllNotes(orderBy: _orderBy);
+    _applyFilters();
+  }
 
-  _notes = _allNotes.where((note) {
-    final matchesSearch =
-        keyword.isEmpty || note.title.toLowerCase().contains(keyword);
+  void _applyFilters() {
+    final keyword = _searchQuery.toLowerCase();
 
-    final matchesCategory =
-        _selectedCategory == 'All' ||
-        note.category == _selectedCategory;
+    _notes = _allNotes.where((note) {
+      final matchesSearch =
+          keyword.isEmpty || note.title.toLowerCase().contains(keyword);
 
-    return matchesSearch && matchesCategory;
-  }).toList();
+      final matchesCategory =
+          _selectedCategory == 'All' || note.category == _selectedCategory;
 
-  _notes.sort((note1, note2) {
-  if (note1.isPinned == true) return -1;
-  if (note2.isPinned == true) return 1;
-  return 0;
-});
-}
+       final matchesArchive =
+        _showArchived ? note.isArchived == true : note.isArchived != true;
 
-  Future<bool> _run([Future<void> Function()? action]) async {
-    if (_isLoading) return false;
-    _setLoading(true);
-    bool success = true;
-    try {
-      if (action != null) await action();
-      _allNotes = await notesRepo.getAllNotes();
-      _applyFilters();
-      _errorMessage = null;
-    } catch (e) {
-      _errorMessage = e.toString();
-      success = false;
-    } finally {
-      _setLoading(false);
-    }
-    return success;
+    return matchesSearch &&
+        matchesCategory &&
+        matchesArchive;
+    }).toList();
   }
 
   Future<void> loadNotes() async {
-    await _run();
+    _setLoading(true);
+    try {
+      await _refreshNotes();
+      _errorMessage = null;
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> addNote(Note newNote) async {
+    _setLoading(true);
+    try {
+      await notesRepo.addNote(newNote);
+      await _refreshNotes();
+      _errorMessage = null;
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> updateNote(Note updatedNote) async {
+    _setLoading(true);
+    try {
+      await notesRepo.editNote(updatedNote);
+      await _refreshNotes();
+      _errorMessage = null;
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> deleteNote(int? id) async {
+    _setLoading(true);
+    try {
+      await notesRepo.deleteNote(id);
+      await _refreshNotes();
+      _errorMessage = null;
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> deleteAllNotes() async {
+    _setLoading(true);
+    try {
+      await notesRepo.deleteAll();
+      await _refreshNotes();
+      _errorMessage = null;
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> togglePin(int id, bool isPinned) async {
+    _setLoading(true);
+
+    try {
+      await notesRepo.togglePin(id, isPinned);
+      await _refreshNotes();
+
+      _errorMessage = null;
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> archiveNote(int id, bool isArchived) async {
+    _setLoading(true);
+
+    try {
+      await notesRepo.archiveNote(id, isArchived);
+      await _refreshNotes();
+
+      _errorMessage = null;
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> orderBy(String sorting) async {
+    if (sorting == 'Newest') {
+      _orderBy = 'isPinned DESC, createdAt DESC';
+    } else if (sorting == 'Oldest') {
+      _orderBy = 'isPinned DESC, createdAt ASC';
+    }
+    await loadNotes();
   }
 
   void searchNotes(String keyword) {
@@ -86,23 +186,9 @@ class NotesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> addNote(Note newNote) {
-    return _run(() => notesRepo.addNote(newNote));
-  }
-
-  Future<bool> updateNote(Note updatedNote) {
-    return _run(() => notesRepo.editNote(updatedNote));
-  }
-
-  Future<bool> deleteNote(int? id) {
-    return _run(() => notesRepo.deleteNote(id));
-  }
-
-  Future<bool> deleteAllNotes() {
-    return _run(() => notesRepo.deleteAll());
-  }
-
-  Future<bool> togglePin(int id ,bool isPinned) {
-    return _run(() => notesRepo.togglePin(id, isPinned));
-  }
+  void showArchivedNotes(bool value) {
+  _showArchived = value;
+  _applyFilters();
+  notifyListeners();
+}
 }

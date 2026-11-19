@@ -19,17 +19,18 @@ class _QuoteSectionState extends State<QuoteSection> {
       context.read<QuoteProvider>().fetchQuote();
     });
   }
-
   void _refresh() {
     context.read<QuoteProvider>().fetchQuote();
   }
+
+  void nullFun() {}
 
   @override
   Widget build(BuildContext context) {
     return Consumer<QuoteProvider>(
       builder: (context, quoteProvider, child) {
         final quoteData = quoteProvider.quotedata;
-        final currQuote=quoteProvider.currquote;
+        final currQuote = quoteProvider.currquote;
         final snackBar = SnackBar(content: Text(quoteProvider.errorMsg));
         if (quoteProvider.isLoading) {
           return Stack(
@@ -43,7 +44,9 @@ class _QuoteSectionState extends State<QuoteSection> {
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Flexible(child: Text(quoteProvider.latestQuote)),
+              Flexible(
+                child: QuoteCard(quoteObj: currQuote, onRefresh: nullFun),
+              ),
               TextButton.icon(
                 onPressed: () {
                   _refresh();

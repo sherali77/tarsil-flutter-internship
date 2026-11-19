@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notes_app/screens/archive_page.dart';
 import 'package:notes_app/screens/create_note.dart';
 import 'package:notes_app/models/note.dart';
 import 'package:notes_app/screens/note_details.dart';
@@ -55,19 +56,44 @@ class _HomeState extends State<HomePage> {
               );
             },
           ),
-          SimplePopupMenu(
-            item1: 'Oldest',
-            item2: 'Newest',
-            onItem1Tap: () {
-            },
-            onItem2Tap: () {
-            },
-          ),
         ],
       ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
+          Divider(
+            height: 10,
+            color: const Color.fromARGB(255, 200, 207, 210),
+            thickness: 1,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                icon: Icon(Icons.archive,color: Colors.deepOrangeAccent,size: 30,),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ArchivePage(),
+                    ),
+                  ).then((_) {
+                    context.read<NotesProvider>().showArchivedNotes(false);
+                  });
+                },
+              ),
+              SimplePopupMenu(
+                item1: 'Oldest',
+                item2: 'Newest',
+                onItem1Tap: () {
+                  context.read<NotesProvider>().orderBy('Oldest');
+                },
+                onItem2Tap: () {
+                  context.read<NotesProvider>().orderBy('Newest');
+                },
+              ),
+            ],
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 20, 12, 0),
             child: TextField(
@@ -140,7 +166,6 @@ class _HomeState extends State<HomePage> {
                     ),
                   );
                 }
-
                 if (noteList.isEmpty) {
                   return EmptyState(message: _emptyMessage(notesProvider));
                 }

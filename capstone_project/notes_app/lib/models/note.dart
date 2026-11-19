@@ -6,6 +6,7 @@ class Note {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool? isPinned;
+  final bool? isArchived;
 
   Note({
     required this.id,
@@ -13,6 +14,7 @@ class Note {
     required this.content,
     required this.category,
     required this.isPinned,
+    required this.isArchived,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : createdAt = createdAt ?? DateTime.now(),
@@ -24,6 +26,7 @@ class Note {
     String? content,
     String? category,
     bool? isPinned,
+    bool? isArchived,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -33,6 +36,7 @@ class Note {
       content: content ?? this.content,
       category: category ?? this.category,
       isPinned: isPinned ?? this.isPinned,
+      isArchived: isArchived ?? this.isArchived,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -44,6 +48,7 @@ class Note {
     'content': content,
     'category': category,
     'isPinned': isPinned == true ? 1 : 0,
+    'isArchived': isArchived == true ? 1 : 0,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
   };
@@ -53,7 +58,8 @@ class Note {
     title: map['title'],
     content: map['content'],
     category: map['category'],
-    isPinned: map['isPinned']==1,
+    isPinned: map['isPinned'] == 1,
+    isArchived: map['isArchived'] == 1,
     createdAt: map['createdAt'] != null
         ? DateTime.parse(map['createdAt'])
         : DateTime.now(),
