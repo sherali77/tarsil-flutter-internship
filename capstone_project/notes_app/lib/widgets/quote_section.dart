@@ -19,11 +19,18 @@ class _QuoteSectionState extends State<QuoteSection> {
       context.read<QuoteProvider>().fetchQuote();
     });
   }
-  void _refresh() {
-    context.read<QuoteProvider>().fetchQuote();
+  Future<void> _refresh() async {
+  final provider = context.read<QuoteProvider>();
+  await provider.fetchQuote();
+  if (!mounted) return;
+  if (provider.errorMsg.isNotEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(provider.errorMsg),
+      ),
+    );
   }
-
-  void nullFun() {}
+}
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +38,6 @@ class _QuoteSectionState extends State<QuoteSection> {
       builder: (context, quoteProvider, child) {
         final quoteData = quoteProvider.quotedata;
         final currQuote = quoteProvider.currquote;
-        final snackBar = SnackBar(content: Text(quoteProvider.errorMsg));
         if (quoteProvider.isLoading) {
           return Stack(
             alignment: Alignment.center,
@@ -45,15 +51,7 @@ class _QuoteSectionState extends State<QuoteSection> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Flexible(
-                child: QuoteCard(quoteObj: currQuote, onRefresh: nullFun),
-              ),
-              TextButton.icon(
-                onPressed: () {
-                  _refresh();
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                },
-                icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                child: QuoteCard(quoteObj: currQuote, onRefresh: _refresh),
               ),
             ],
           );

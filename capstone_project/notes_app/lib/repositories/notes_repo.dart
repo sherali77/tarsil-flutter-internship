@@ -76,7 +76,7 @@ class NotesRepo {
     await DatabaseService.instance.archiveNote(id, isArchived);
     }on DatabaseException catch (e, stackTrace) {
       Error.throwWithStackTrace(
-        Exception('Database failed to pin a note'),
+        Exception('Database failed to archive a note'),
         stackTrace,
       );
     }
