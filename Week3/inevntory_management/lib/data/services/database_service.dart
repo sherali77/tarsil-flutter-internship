@@ -1,4 +1,6 @@
 import 'dart:async';
+
+import 'package:inevntory_management/core/errors/app_exceptions.dart';
 import 'package:inevntory_management/models/item.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -40,13 +42,14 @@ class DatabaseService {
     try {
       final db = await DatabaseService.instance.database;
       final List<Map<String, dynamic>> maps = await db.query(
-        DatabaseService.tableName
+        DatabaseService.tableName,
       );
       return maps.map((e) => Item.frommap(e)).toList();
     } on DatabaseException catch (e, stackTrace) {
-      Error.throwWithStackTrace(
-        Exception("databae failed in loading items$e"),
-        stackTrace,
+      throw DataBaseException(
+        message: "failed to load items",
+        orignalError: e,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -60,9 +63,10 @@ class DatabaseService {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     } on DatabaseException catch (e, stackTrace) {
-      Error.throwWithStackTrace(
-        Exception("databse failed in inserting item $e"),
-        stackTrace,
+      throw DataBaseException(
+        message: "failed to add item",
+        orignalError: e,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -72,9 +76,10 @@ class DatabaseService {
       final db = await DatabaseService.instance.database;
       await db.update(DatabaseService.tableName, item.tomap());
     } on DatabaseException catch (e, stackTrace) {
-      Error.throwWithStackTrace(
-        Exception("databse failed in updating item $e"),
-        stackTrace,
+      throw DataBaseException(
+        message: "failed to update item",
+        orignalError: e,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -88,9 +93,10 @@ class DatabaseService {
         whereArgs: [id],
       );
     } on DatabaseException catch (e, stackTrace) {
-      Error.throwWithStackTrace(
-        Exception("databse failed in deleting item $e"),
-        stackTrace,
+      throw DataBaseException(
+        message: "failed to delete item",
+        orignalError: e,
+        stackTrace: stackTrace,
       );
     }
   }

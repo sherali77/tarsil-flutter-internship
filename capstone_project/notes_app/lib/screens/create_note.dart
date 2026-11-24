@@ -129,7 +129,7 @@ class _CreateNoteState extends State<CreateNote> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _selectedCategory,
+                initialValue: _selectedCategory,
                 decoration: InputDecoration(
                   labelText: 'Category',
                   filled: true,
