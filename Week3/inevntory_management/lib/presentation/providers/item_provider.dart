@@ -22,6 +22,15 @@ class ItemProvider extends ChangeNotifier {
     _itemList = await itemrepo.getAllItems();
   }
 
+  Item? getItemById(int? id) {
+    for (final item in _itemList) {
+      if (item.id == id) {
+        return item;
+      }
+    }
+    return null;
+  }
+
   Future<void> loadItems() async {
     setLoading(true);
     try {

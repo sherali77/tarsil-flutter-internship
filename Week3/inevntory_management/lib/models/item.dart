@@ -1,5 +1,5 @@
 class Item {
-  final int id;
+  final int? id;
   final String name;
   final String sku;
   final int price;
@@ -16,6 +16,26 @@ class Item {
     required this.syncStatus,
     DateTime? updatedAt,
   }) : updatedAt = updatedAt ?? DateTime.now();
+
+  Item copywith({
+    int? id,
+    String? name,
+    String? sku,
+    int? price,
+    int? stock,
+    DateTime? updatedAt,
+    String? syncStatus,
+  }) {
+    return Item(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      price: price ?? this.price,
+      sku: sku ?? this.sku,
+      stock: stock ?? this.stock,
+      syncStatus: syncStatus ?? this.syncStatus,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 
   Map<String, dynamic> tomap() => {
     'id': id,

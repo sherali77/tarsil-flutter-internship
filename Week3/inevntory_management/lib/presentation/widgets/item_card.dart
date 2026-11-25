@@ -10,15 +10,16 @@ class ItemCard extends StatelessWidget {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
       elevation: 2,
+      color: Color.fromARGB(255, 69, 68, 68),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadiusGeometry.circular(12),
       ),
       child: ListTile(
-        title: Text(item.name, style: TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text("${item.stock}"),
+        title: Text(item.name, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        subtitle: Text("${item.stock}",style: TextStyle(color: Colors.white),),
         trailing: Text(
           "Rs ${item.price}",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         onTap: ontap,
       ),
