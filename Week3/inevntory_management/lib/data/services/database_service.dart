@@ -74,7 +74,7 @@ class DatabaseService {
   Future<void> updateItem(Item item) async {
     try {
       final db = await DatabaseService.instance.database;
-      await db.update(DatabaseService.tableName, item.tomap());
+      await db.update(DatabaseService.tableName, item.tomap(),where: "id=?", whereArgs: [item.id]);
     } on DatabaseException catch (e, stackTrace) {
       throw DataBaseException(
         message: "failed to update item",

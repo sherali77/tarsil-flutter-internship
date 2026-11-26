@@ -1,27 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:inevntory_management/models/item.dart';
 import 'package:inevntory_management/presentation/providers/item_provider.dart';
 import 'package:provider/provider.dart';
 
 class CreateItem extends StatefulWidget {
-  const CreateItem({super.key});
+  final Item? itemEdit;
+  const CreateItem({super.key, this.itemEdit});
   @override
   State<StatefulWidget> createState() => _CreateItemState();
 }
 
 class _CreateItemState extends State<CreateItem> {
+  late TextEditingController _nameController;
+  late TextEditingController _priceController;
+  late TextEditingController _skuController;
+  late TextEditingController _stockController;
+  late TextEditingController _syncStatus;
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _priceController = TextEditingController();
-  final TextEditingController _skuController = TextEditingController();
-  final TextEditingController _stockController = TextEditingController();
-  final TextEditingController _syncStatus = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(
+      text: widget.itemEdit != null ? widget.itemEdit!.name : '',
+    );
+     _priceController = TextEditingController(
+      text: widget.itemEdit != null ?  widget.itemEdit!.price.toString() : '',
+    );
+     _skuController = TextEditingController(
+      text: widget.itemEdit != null ? widget.itemEdit!.sku : '',
+    );
+     _stockController = TextEditingController(
+      text: widget.itemEdit != null ? widget.itemEdit!.stock.toString() : '',
+    );
+     _syncStatus = TextEditingController(
+      text: widget.itemEdit != null ? widget.itemEdit!.syncStatus : '',
+    );
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
     _priceController.dispose();
     _skuController.dispose();
     _stockController.dispose();
+    super.dispose();
   }
 
   Future<void> _save() async {
@@ -31,15 +54,28 @@ class _CreateItemState extends State<CreateItem> {
     final sku = _skuController.text.trim();
     final stock = int.parse(_stockController.text);
     final status = _syncStatus.text.trim();
-    final item = Item(
-      id: null,
-      name: name,
-      price: price,
-      sku: sku,
-      stock: stock,
-      syncStatus: status,
-    );
-    provider.addItem(item);
+    final editing = widget.itemEdit;
+    if (editing == null) {
+      final item = Item(
+        id: null,
+        name: name,
+        price: price,
+        sku: sku,
+        stock: stock,
+        syncStatus: status,
+      );
+      await provider.addItem(item);
+    } else {
+      final updated = editing.copywith(
+        id: null,
+        name: name,
+        price: price,
+        sku: sku,
+        stock: stock,
+        syncStatus: status,
+      );
+     await provider.updateItem(updated);
+    }
   }
 
   @override
@@ -48,10 +84,11 @@ class _CreateItemState extends State<CreateItem> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(
-          "Create Item",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          "Add Screen",
+          style: GoogleFonts.poppins(fontSize: 25, fontWeight: FontWeight.bold, color: const Color.fromARGB(255, 200, 189, 189)),
         ),
         centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 69, 68, 68),
       ),
       body: Padding(
         padding: EdgeInsets.all(15),

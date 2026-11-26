@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:inevntory_management/models/item.dart';
 import 'package:inevntory_management/presentation/providers/item_provider.dart';
 import 'package:inevntory_management/presentation/screens/create_item.dart';
+import 'package:inevntory_management/presentation/utils/date_format.dart';
 import 'package:inevntory_management/presentation/widgets/delete_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,10 +15,11 @@ class DetailItem extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Detail Items",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          "Detail Screen",
+          style: GoogleFonts.poppins(fontSize: 25, fontWeight: FontWeight.bold, color: const Color.fromARGB(255, 200, 189, 189)),
         ),
         centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 69, 68, 68),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -47,7 +49,7 @@ class DetailItem extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "${currentItem.price}",
+                          "\$ ${currentItem.price}",
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -85,7 +87,7 @@ class DetailItem extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                      (currentItem.updatedAt.toString()),
+                      (DateFormat.format(currentItem.updatedAt)),
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.w200,
@@ -98,7 +100,7 @@ class DetailItem extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) {
-                                  return CreateItem();
+                                  return CreateItem(itemEdit: currentItem);
                                 },
                               ),
                             );

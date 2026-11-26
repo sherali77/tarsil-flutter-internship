@@ -27,11 +27,11 @@ class _HomeState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 169, 168, 168),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
         title: Text(
           "Home Screen",
-          style: GoogleFonts.poppins(fontSize: 25, fontWeight: FontWeight.bold, color: const Color.fromARGB(255, 200, 189, 189)),
+          style: GoogleFonts.poppins(fontSize: 25 ,fontWeight: FontWeight.bold, color: const Color.fromARGB(255, 200, 189, 189)),
         ),
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 69, 68, 68),
@@ -39,10 +39,11 @@ class _HomeState extends State<HomePage> {
       body:Column(
       children: [
         SizedBox(height: 20,),
-        Text("My Inventory",
+        Text("Product List",
         style: GoogleFonts.poppins(
           fontSize: 21,
           fontWeight: FontWeight.w700,
+          fontStyle: FontStyle.italic,
           color: const Color.fromARGB(255, 21, 9, 125),
         ),
         textAlign: TextAlign.center,
@@ -83,6 +84,7 @@ class _HomeState extends State<HomePage> {
                   final item = itemList[index];
                   return ItemCard(
                     item: item,
+                    index: index,
                     ontap: () {
                       Navigator.push(
                         context,
@@ -99,7 +101,8 @@ class _HomeState extends State<HomePage> {
       ]
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add, size: 14),
+        backgroundColor: Color.fromARGB(255, 69, 68, 68),
+        child: Icon(Icons.add, size: 18,color: Colors.white,),
         onPressed: () {
           Navigator.push(
             context,
